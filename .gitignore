@@ -1,24 +1,16 @@
-target/
-!.mvn/wrapper/maven-wrapper.jar
-
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-
-### IntelliJ IDEA ###
 .idea
-*.iws
-*.iml
-*.ipr
+bower_components
+classes
+node_modules
+target
+out
+IAA-Hausarbeit.iml
 
-### NetBeans ###
-nbproject/private/
-build/
-nbbuild/
-dist/
-nbdist/
-.nb-gradle/
+
+#comment if change of file!
+spring.xml
+
+LibraryManagement.iml
+database.trace.db
+/src/main/webapp/static/css/app.min.css
+/src/main/webapp/static/js/app.min.js

@@ -1,0 +1,32 @@
+{
+  "name": "secureSending",
+  "description": "component for sending personal information to customers in a secure way",
+  "main": "",
+  "keywords": [
+    "outbound",
+    "secure",
+    "customerservice",
+    "mail"
+  ],
+  "authors": [
+    "Tim Dekarz (v102180)"
+  ],
+  "license": "Generali Property",
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "material-design-lite": "^1.3.0",
+    "jquery": "^3.2.1",
+    "bootstrap": "^3.3.7"
+  },
+  "devDependencies": {
+    "livereload-js": "^2.2.1"
+  }
+}
