@@ -3,18 +3,17 @@
 <head>
 	<meta charset="UTF-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">
 	<meta author="Tim Dekarz">
 	<meta description="Form for sending secure information to customer">
 	<title>Sicherer Mail-Versand</title>
 
-	<!-- Materia Design Lite -->
-	<link rel="stylesheet" href="/assets/material-design-lite/material.min.css">
+	<!-- Materialize -->
+	<link rel="stylesheet" href="/assets/materialize/dist/css/materialize.min.css">
 	<!-- Bootstrap -->
-	<link rel="stylesheet" href="/assets/bootstrap/dist/css/bootstrap.min.css">
-	<!-- CDN Icons and Fonts -->
+	<!--<link rel="stylesheet" href="/assets/bootstrap/dist/css/bootstrap.min.css">-->
+	<!-- CDN Icons -->
 	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-	<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">
 	<!-- Custom CSS -->
 	<link rel="stylesheet" href="/css/main.css">
 	<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -23,95 +22,238 @@
 	<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 	<![endif]-->
 </head>
-<body>
+<body class="grey lighten-3">
 
-<div class="demo-layout mdl-layout mdl-layout--fixed-header mdl-js-layout mdl-color--grey-100">
-	<header
-		class="demo-header mdl-layout__header mdl-layout__header--scroll mdl-color--grey-100 mdl-color-text--grey-800">
-		<div class="mdl-layout__header-row">
-			<span class="mdl-layout-title">Generali -  Sicherer Mail-Versand</span>
-			<div class="mdl-layout-spacer"></div>
-		</div>
-	</header>
-	<div class="demo-ribbon"></div>
-	<main class="demo-main mdl-layout__content">
-		<div class="demo-container mdl-grid">
-			<div class="mdl-cell mdl-cell--2-col mdl-cell--hide-tablet mdl-cell--hide-phone"></div>
-			<div
-				class="demo-content mdl-color--white mdl-shadow--4dp content mdl-color-text--grey-800 mdl-cell mdl-cell--8-col">
-				<div class="mdl-card__title">
-					<h2 class="mdl-card__title-text">Versand</h2>
-				</div>
-				<div class="mdl-card__supporting-text">
-					<p>
-						Enim labore aliqua consequat ut quis ad occaecat aliquip incididunt. Sunt nulla eu enim irure
-						enim nostrud aliqua consectetur ad consectetur sunt ullamco officia. Ex officia laborum et
-						consequat duis.
-					</p>
-					<p>
-						Excepteur reprehenderit sint exercitation ipsum consequat qui sit id velit elit. Velit anim
-						eiusmod labore sit amet.
-					</p>
-					<form action="#" class="">
-						<div class="mdl-grid">
-							<div class="mdl-cell mdl-cell--6-col">
-								<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label ">
-									<input class="mdl-textfield__input" pattern="[A-Z,a-z, ]*" type="text" id="Name">
-									<label class="mdl-textfield__label" for="Name">Name...</label>
-									<span class="mdl-textfield__error">Letters and spaces only</span>
-								</div>
-							</div>
-							<div class="mdl-cell mdl-cell--6-col">
-								<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label ">
-									<input class="mdl-textfield__input" pattern="[A-Z,a-z, ]*" type="text" id="Name">
-									<label class="mdl-textfield__label" for="Name">Name...</label>
-									<span class="mdl-textfield__error">Letters and spaces only</span>
-								</div>
-							</div>
-							<div class="mdl-cell mdl-cell--6-col">
-								<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label ">
-									<input class="mdl-textfield__input" pattern="[A-Z,a-z, ]*" type="text" id="Name">
-									<label class="mdl-textfield__label" for="Name">Name...</label>
-									<span class="mdl-textfield__error">Letters and spaces only</span>
-								</div>
-							</div>
-							<div class="mdl-cell mdl-cell--6-col">
-								<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label ">
-									<input class="mdl-textfield__input" pattern="[A-Z,a-z, ]*" type="text" id="Name">
-									<label class="mdl-textfield__label" for="Name">Name...</label>
-									<span class="mdl-textfield__error">Letters and spaces only</span>
-								</div>
-							</div>
-							<div class="mdl-cell mdl-cell--12-col">
-								<div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-									<textarea class="mdl-textfield__input" type="text" rows="5" id="note"></textarea>
-									<label class="mdl-textfield__label" for="note">Enter note</label>
-								</div>
-							</div>
-							<p>
-								<button
-									class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent"
-									type="submit">
-									Submit
-								</button>
-							</p>
-						</div>
-					</form>
-				</div>
+<nav class="red darken-2" role="navigation">
+	<div class="nav-wrapper container"><a id="logo-container" href="#" class="brand-logo">Logo</a>
+		<ul class="right hide-on-med-and-down">
+			<li><a href="#">Navbar Link</a></li>
+		</ul>
 
+		<ul id="nav-mobile" class="side-nav">
+			<li><a href="#">Navbar Link</a></li>
+		</ul>
+		<a href="#" data-activates="nav-mobile" class="button-collapse"><i class="material-icons">menu</i></a>
+	</div>
+</nav>
+
+<div class="container">
+
+	<div class="section">
+		{{#success}}
+		<div class="row">
+			<div class="col s12">
+				<div class="card-panel green">
+          			<span class="white-text">Die Daten wurden erfolgreich an den Kunden weitergeleitet</span>
+				</div>
 			</div>
 		</div>
-		<footer class="demo-footer mdl-mini-footer">
-			<div class="mdl-mini-footer--left-section">
-				<ul class="mdl-mini-footer--link-list">
-					<li><a href="#">Help</a></li>
-					<li><a href="#">Privacy and Terms</a></li>
-					<li><a href="#">User Agreement</a></li>
+		{{/success}}
+		{{#failure}}
+		<div class="row">
+			<div class="col s12">
+				<div class="card-panel red">
+					<span class="white-text">Es sind folgenden Fehler aufgetreten: </span>
+					{{#errorList}}
+						<span class="white-text error" data-field="{{field}}">{{error}}</span><br>
+					{{/errorList}}
+				</div>
+			</div>
+		</div>
+		{{/failure}}
+	</div>
+	<div class="section">
+		<div class="row">
+			<form id="secureMail" action="/form" enctype="multipart/form-data" method="post">
+				<div class="row card">
+					<div class="col s10 offset-s1 card-content">
+						<div class="row">
+							<h5 class="card-title"><i class="material-icons left">account_circle</i> Kontakt</h5>
+							<div class="input-field col s6">
+								<select name="title" required>
+									{{#titleUnselected}}
+										<option value="" disabled selected>Anrede wählen</option>
+										<option value="female">Frau</option>
+										<option value="male">Herr</option>
+									{{/titleUnselected}}
+									{{#titleFemale}}
+										<option value="" disabled>Anrede wählen</option>
+										<option value="female" selected>Frau</option>
+										<option value="male">Herr</option>
+									{{/titleFemale}}
+									{{#titleMale}}
+										<option value="" disabled>Anrede wählen</option>
+										<option value="female">Frau</option>
+										<option value="male" selected>Herr</option>
+									{{/titleMale}}
+								</select>
+								<label>Anrede*</label>
+							</div>
+						</div>
+						<div class="row">
+							<div class="input-field col s6">
+								<input id="firstName" name="firstName" type="text" class="validate" value="{{firstName}}" required>
+								<label for="firstName" data-error="Bitte Vornamen eingeben">Vorname*</label>
+							</div>
+							<div class="input-field col s6">
+								<input id="lastName" name="lastName" type="text" class="validate" value="{{lastName}}" required>
+								<label for="lastName" data-error="Bitte Nachnamen eingeben">Nachname*</label>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row card">
+					<div class="col s10 offset-s1 card-content">
+						<div class="row">
+							<h5 class="card-title"><i class="material-icons left">email</i> Versand</h5>
+							<div class="input-field col s6">
+								<input id="email" name="email" type="email" class="validate" value="{{email}}" required>
+								<label for="email" data-error="Bitte Mailadresse eingeben">E-Mail Adresse*</label>
+							</div>
+							<div class="input-field col s6">
+								<input id="password" name="password" type="password" class="validate" required>
+								<label for="password" data-error="Bitte Passwort eingeben">Passwort*</label>
+							</div>
+						</div>
+						<div class="row">
+							<div class="switch inline"^>
+								<label>
+									Mail
+									{{#telSelect}}
+										<input type="checkbox" name="sms" id="sms" checked>
+									{{/telSelect}}
+									{{^telSelect}}
+										<input type="checkbox" name="sms" id="sms">
+									{{/telSelect}}
+									<span class="lever"></span>
+									SMS
+								</label>
+							</div>
+						</div>
+						<div class="row">
+							<div class="input-field inline col s6">
+								{{#telSelect}}
+									<input id="telephone" name="telephone" type="tel" class="validate" value="{{tel}}" required>
+								{{/telSelect}}
+								{{^telSelect}}
+									<input id="telephone" name="telephone" type="tel" class="validate" value="{{tel}}" required disabled>
+								{{/telSelect}}
+								<label for="telephone" data-error="Bitte Telefonnummer eingeben">Telefonnummer</label>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row card">
+					<div class="col s10 offset-s1 card-content">
+						<div class="row">
+							<h5 class="card-title"><i class="material-icons left">label</i> Erfassung</h5>
+							<div class="input-field col s6">
+								<input id="task" name="task" type="number" class="validate" value="{{task}}" required>
+								<label for="task" data-error="Bitte Vorgangsnummer eingeben">Vorgangsnummer*</label>
+							</div>
+							<div class="input-field inline col s6">
+								<input id="insuranceId" name="insuranceId" type="number" class="validate" value="{{insuranceId}}" required>
+								<label for="insuranceId"
+									   data-error="Bitte Versicherungsnummer eingeben">Versicherungsnummer*</label>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row card">
+					<div class="col s10 offset-s1 card-content">
+						<h5 class="card-title"><i class="material-icons left">mode_edit</i> Anschreiben</h5>
+						<div class="input-field col s12">
+							<textarea id="wysiwyg" name="message">Hello World!</textarea>
+						</div>
+					</div>
+				</div>
+				<div class="row card">
+					<div class="col s10 offset-s1 card-content">
+						<div class="row">
+							<h5 class="card-title"><i class="material-icons left">note_add</i> Anhänge</h5>
+							<div class="file-field input-field">
+								<div class="btn-large red darken-4">
+									<span>Dateien</span>
+									<input type="file" name="uploads" multiple>
+								</div>
+								<div class="file-path-wrapper">
+									<input class="file-path validate" type="text" placeholder="Fügen Sie ein oder mehrere Anhänge hinzu">
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row section">
+					<!-- test and show preview -->
+					<button id="preview" formaction="/generatepdf" class="waves-effect waves-light btn red darken-2">Vorschau<i class="material-icons right">note_add</i></button>
+
+					<!-- SEND DIRECT (With Modal dialog -->
+					<a class="waves-effect waves-light btn red darken-4" href="#confirm">Absenden<i class="material-icons right">send</i></a>
+
+					<!-- Modal Structure -->
+					<div id="confirm" class="modal">
+						<div class="modal-content">
+							<div id="confirmText">
+								<h4>Bestätigung</h4>
+								<p>Mit Absenden des Formulars werden die eingegebenen Daten verarbeitet und an die angegebene
+									Mailadresse des Endkunden weitergeleitet. Bitte stellen Sie daher die Korrektheit der Daten
+									sicher.</p>
+							</div>
+							<div id="pendingForm" hidden>
+								<div class="progress">
+									<div class="indeterminate"></div>
+								</div>
+							</div>
+						</div>
+						<div class="modal-footer">
+							<button id="send" class="modal-action btn waves-effect waves-light red darken-4"
+									type="submit" name="action">Absenden
+								<i class="material-icons right">send</i>
+							</button>
+							<a href="#!" class="modal-action modal-close waves-effect waves-red btn-flat">Abbrechen</a>
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<footer class="page-footer red darken-4">
+	<div class="container">
+		<div class="row">
+			<div class="col l6 s12">
+				<h5 class="white-text">Generali</h5>
+				<p class="grey-text text-lighten-4">WLorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam
+					nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero
+					eos et accusam et justo duo dolores et ea rebum. </p>
+			</div>
+			<div class="col l3 s12">
+				<h5 class="white-text">Settings</h5>
+				<ul>
+					<li><a class="white-text" href="#!">Link 1</a></li>
+					<li><a class="white-text" href="#!">Link 2</a></li>
+					<li><a class="white-text" href="#!">Link 3</a></li>
+					<li><a class="white-text" href="#!">Link 4</a></li>
 				</ul>
 			</div>
-		</footer>
-	</main>
-</div>
+			<div class="col l3 s12">
+				<h5 class="white-text">Connect</h5>
+				<ul>
+					<li><a class="white-text" href="#!">Link 1</a></li>
+					<li><a class="white-text" href="#!">Link 2</a></li>
+					<li><a class="white-text" href="#!">Link 3</a></li>
+					<li><a class="white-text" href="#!">Link 4</a></li>
+				</ul>
+			</div>
+		</div>
+	</div>
+	<div class="footer-copyright">
+		<div class="container">
+			Made by GDIS
+		</div>
+	</div>
+</footer>
 
 
 <!-- jQuery -->
@@ -119,10 +261,12 @@
 <!-- LiveReload -->
 <!-- [ONLY FOR DEV] -->
 <script src="/assets/livereload-js/dist/livereload.js"></script>
-<!-- Material Design Lite -->
-<script src="/assets/material-design-lite/material.min.js"></script>
+<!-- Materialize -->
+<script src="/assets/materialize/dist/js/materialize.min.js"></script>
 <!-- Bootstrap -->
-<script src="/assets/bootstrap/dist/js/bootstrap.min.js"></script>
+<!--<script src="/assets/bootstrap/dist/js/bootstrap.min.js"></script>-->
+<!-- RTF Editor (Tinyme) -->
+<script src="/assets/tinymce/tinymce.min.js"></script>
 <!-- Custom JS -->
 <script src="/js/main.js"></script>
 </body>
