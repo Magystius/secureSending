@@ -25,13 +25,11 @@ public class FormData {
 
 	private String password;
 
-	private boolean sms;
-
-	private String telephone;
-
 	private String task;
 
 	private String insuranceId;
+
+	private String subject;
 
 	private String message;
 
@@ -43,10 +41,9 @@ public class FormData {
 		this.lastName = "";
 		this.email = "";
 		this.password = "";
-		this.sms = false;
-		this.telephone = "";
 		this.task = "";
 		this.insuranceId = "";
+		this.subject = "";
 		this.message = "";
 		this.uploads = new ArrayList<>();
 	}

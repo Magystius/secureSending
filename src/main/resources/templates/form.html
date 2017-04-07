@@ -111,34 +111,8 @@
 								<label for="email" data-error="Bitte Mailadresse eingeben">E-Mail Adresse*</label>
 							</div>
 							<div class="input-field col s6">
-								<input id="password" name="password" type="password" class="validate" required>
+								<input id="password" name="password" type="text" class="validate" value="{{password}}" required>
 								<label for="password" data-error="Bitte Passwort eingeben">Passwort*</label>
-							</div>
-						</div>
-						<div class="row">
-							<div class="switch inline"^>
-								<label>
-									Mail
-									{{#telSelect}}
-										<input type="checkbox" name="sms" id="sms" checked>
-									{{/telSelect}}
-									{{^telSelect}}
-										<input type="checkbox" name="sms" id="sms">
-									{{/telSelect}}
-									<span class="lever"></span>
-									SMS
-								</label>
-							</div>
-						</div>
-						<div class="row">
-							<div class="input-field inline col s6">
-								{{#telSelect}}
-									<input id="telephone" name="telephone" type="tel" class="validate" value="{{tel}}" required>
-								{{/telSelect}}
-								{{^telSelect}}
-									<input id="telephone" name="telephone" type="tel" class="validate" value="{{tel}}" required disabled>
-								{{/telSelect}}
-								<label for="telephone" data-error="Bitte Telefonnummer eingeben">Telefonnummer</label>
 							</div>
 						</div>
 					</div>
@@ -163,7 +137,11 @@
 					<div class="col s10 offset-s1 card-content">
 						<h5 class="card-title"><i class="material-icons left">mode_edit</i> Anschreiben</h5>
 						<div class="input-field col s12">
-							<textarea id="wysiwyg" name="message">Hello World!</textarea>
+							<input id="subject" name="subject" type="text" class="validate" value="{{subject}}" required>
+							<label for="subject" data-error="Bitte Betreff eingeben">Betreff*</label>
+						</div>
+						<div class="input-field col s12">
+							<textarea id="wysiwyg" name="message">{{message}}</textarea>
 						</div>
 					</div>
 				</div>
@@ -185,7 +163,7 @@
 				</div>
 				<div class="row section">
 					<!-- test and show preview -->
-					<button id="preview" formaction="/generatepdf" class="waves-effect waves-light btn red darken-2">Vorschau<i class="material-icons right">note_add</i></button>
+					<button id="preview" formaction="/generatepreview" class="waves-effect waves-light btn red darken-2">Vorschau<i class="material-icons right">note</i></button>
 
 					<!-- SEND DIRECT (With Modal dialog -->
 					<a class="waves-effect waves-light btn red darken-4" href="#confirm">Absenden<i class="material-icons right">send</i></a>

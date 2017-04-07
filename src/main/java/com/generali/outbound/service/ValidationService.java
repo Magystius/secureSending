@@ -58,14 +58,6 @@ public class ValidationService {
 			error.put("field", "password");
 			errors.add(error);
 		}
-		if(data.getTelephone() != null && !data.getTelephone().isEmpty()) {
-			if(!data.getTelephone().matches("[0-9]+")) {
-				HashMap<String, String> error = new HashMap<>();
-				error.put("error", "Die Telefonnummer darf nur Zahlen enthalten");
-				error.put("field", "telephone");
-				errors.add(error);
-			}
-		}
 		if(!data.getTask().matches("[0-9]+")) {
 			HashMap<String, String> error = new HashMap<>();
 			error.put("error", "Die Vorgangsnummer darf nur Zahlen enthalten");
@@ -79,7 +71,7 @@ public class ValidationService {
 			errors.add(error);
 		}
 
-		//TODO: validate free text?
+		//TODO: validate free text and subject!
 
 		if(data.getUploads().size() != 1 && !data.getUploads().get(0).getOriginalFilename().isEmpty()) {
 			data.getUploads().forEach((v) -> {
