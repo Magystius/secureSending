@@ -68,6 +68,24 @@
 			<artifactId>xmlworker</artifactId>
 			<version>5.5.11</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.documents4j/documents4j-api -->
+		<dependency>
+			<groupId>com.documents4j</groupId>
+			<artifactId>documents4j-api</artifactId>
+			<version>1.0.3</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.documents4j/documents4j-local -->
+		<dependency>
+			<groupId>com.documents4j</groupId>
+			<artifactId>documents4j-local</artifactId>
+			<version>1.0.3</version>
+		</dependency>
+		<dependency>
+			<groupId>com.documents4j</groupId>
+			<artifactId>documents4j-transformer-msoffice-word</artifactId>
+			<version>1.0.3</version>
+		</dependency>
+
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

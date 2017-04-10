@@ -3,7 +3,6 @@ package com.generali.outbound.service;
 import com.generali.outbound.domain.FormData;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Element;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.tool.xml.Pipeline;
@@ -102,9 +101,15 @@ public class GenerationService {
 		return file;
 	}
 
-	public List<File> convertToPDF(List<MultipartFile> uploads) {
+	public List<File> convertToPdf(List<MultipartFile> uploads) {
 
 		return new ArrayList<>();
+	}
+
+	private File convertWordToPdf(File file) {
+
+		return new File("");
+
 	}
 
 	private String generateFile(String email) throws NoSuchAlgorithmException {
