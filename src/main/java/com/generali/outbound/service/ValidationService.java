@@ -21,7 +21,7 @@ public class ValidationService {
 
 		List<Map<String, String>> errors = new ArrayList<>();
 
-		if(data.getTitle() == null || (!data.getTitle().equals("female ") && !data.getTitle().equals("male"))) {
+		if(data.getTitle() == null || (!data.getTitle().equals("female") && !data.getTitle().equals("male"))) {
 			HashMap<String, String> error = new HashMap<>();
 			error.put("error", "Ungültiger Titel");
 			error.put("field", "title");
@@ -73,7 +73,7 @@ public class ValidationService {
 
 		//TODO: validate free text and subject!
 
-		if(data.getUploads().size() != 1 && !data.getUploads().get(0).getOriginalFilename().isEmpty()) {
+		if(!data.getUploads().get(0).getOriginalFilename().isEmpty()) {
 			data.getUploads().forEach((v) -> {
 				String[] temp = v.getOriginalFilename().split(".");
 				if(supportedFileTypes.toString().contains(temp[temp.length - 1])) {

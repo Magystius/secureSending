@@ -24,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -124,30 +125,8 @@ public class GenerationService {
 		spacer.setSpacingBefore(20f);
 		document.add(spacer);
 
-		HtmlPipelineContext htmlContext = new HtmlPipelineContext(null);
-		htmlContext.setTagFactory(Tags.getHtmlTagProcessorFactory());
-		htmlContext.setImageProvider(new AbstractImageProvider() {
-
-			public String getImageRootPath() {
-
-				return "http://localhost:8080";
-
-			}
-
-		});
-		CSSResolver cssResolver =
-			XMLWorkerHelper.getInstance().getDefaultCssResolver(true);
-		Pipeline<?> pipeline =
-			new CssResolverPipeline(cssResolver,
-				new HtmlPipeline(htmlContext,
-					new PdfWriterPipeline(document, writer)));
-		XMLWorker worker = new XMLWorker(pipeline, true);
-		XMLParser p = new XMLParser(worker);
-
-		p.parse(new ByteArrayInputStream(data.getMessage().getBytes(StandardCharsets.UTF_8)));
-		/*for (Element e : XMLWorkerHelper.parseToElementList(data.getMessage(), null)) {
-			document.add(e);
-		}*/
+		InputStream messageStream = new ByteArrayInputStream(data.getMessage().getBytes(StandardCharsets.UTF_8));
+		XMLWorkerHelper.getInstance().parseXHtml(writer, document, messageStream, Charset.forName("cp1252"));
 
 		//TODO: add images to garbage list
 
@@ -201,6 +180,8 @@ public class GenerationService {
 			success = convertMSOfficeToPdf(file.getInputStream(), psFile, DocumentType.MS_WORD);
 		} else if(type.contains("xls") || type.contains("xlsx")) {
 			success = convertMSOfficeToPdf(file.getInputStream(), psFile, DocumentType.MS_EXCEL);
+		} else if(type.contains("pdf")) {
+			success = savePdf(file.getInputStream(), psFile);
 		}
 		//TODO: add here support for powerpoint
 		else {
@@ -217,6 +198,24 @@ public class GenerationService {
 		generatedFiles.get(dirName).add(psFile);
 
 		return psFile;
+	}
+
+	private boolean savePdf(InputStream source, File target) {
+
+		try {
+			byte[] buffer = new byte[source.available()];
+			source.read(buffer);
+
+			OutputStream outStream = new FileOutputStream(target);
+			outStream.write(buffer);
+			outStream.flush();
+			outStream.close();
+			source.close();
+		} catch (IOException e) {
+			return false;
+		}
+
+		return true;
 	}
 
 	private boolean convertMSOfficeToPdf(InputStream officeFile, File target, DocumentType type) {

@@ -81,9 +81,9 @@ public class FormController {
 			try {
 				List<File> files = new ArrayList<>();
 				files.addAll(generationService.generateAll(data)); //use this method for parallel converting/generating
-				//TODO: call merge method
+				generationService.mergeDir(data.getEmail()); // use mail as dir id to merge all previously generated docs
 				//TODO: send to somewhere
-				generationService.deleteFiles(data.getEmail(), null); //delete temp files
+				//generationService.deleteFiles(data.getEmail(), null); //delete temp files
 
 			} catch (Exception e) {
 				populateModel(data, model);
