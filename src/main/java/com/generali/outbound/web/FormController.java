@@ -81,6 +81,10 @@ public class FormController {
 			try {
 				List<File> files = new ArrayList<>();
 				files.addAll(generationService.generateAll(data)); //use this method for parallel converting/generating
+				//TODO: call merge method
+				//TODO: send to somewhere
+				generationService.deleteFiles(data.getEmail(), null); //delete temp files
+
 			} catch (Exception e) {
 				populateModel(data, model);
 				model.put("failure", true);

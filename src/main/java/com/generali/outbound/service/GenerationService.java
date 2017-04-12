@@ -5,8 +5,9 @@ import com.documents4j.api.IConverter;
 import com.documents4j.job.LocalConverter;
 import com.generali.outbound.domain.FormData;
 import com.generali.outbound.exception.ConvertingException;
+import com.generali.outbound.exception.DeletionException;
 import com.itextpdf.text.*;
-import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.pdf.*;
 import com.itextpdf.tool.xml.Pipeline;
 import com.itextpdf.tool.xml.XMLWorker;
 import com.itextpdf.tool.xml.XMLWorkerHelper;
@@ -24,6 +25,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -247,7 +251,89 @@ public class GenerationService {
 		return true;
 	}
 
-	public void deleteFiles(List<List> files) {
+	public File mergeDir(String id) throws IOException, DocumentException, NoSuchAlgorithmException {
+
+		//prepare basic info
+		String dirName = generateFile(id);
+		String fileName = "./tmp/" +  dirName + "/merged.pdf";
+
+		//open files
+		Map<String, PdfReader> files = new HashMap<>();
+		String[] fileNames = new File("./tmp/" + dirName).list();
+		for(String name : fileNames) {
+			files.put(name, new PdfReader(name));
+		}
+
+		//merge all files
+		Document document = new Document();
+		PdfCopy copy = new PdfCopy(document, new FileOutputStream(fileName));
+		PdfCopy.PageStamp stamp;
+		document.open();
+		int n;
+		int pageNo = 0;
+		PdfImportedPage page;
+		Chunk chunk;
+
+		/*
+			Iterate throw all pdf files and therefor each page of each document
+			 concat them all and add a consistent page numeration
+		 */
+		//TODO: Check if we really need an additional page numeration
+		for (Map.Entry<String, PdfReader> entry : files.entrySet()) {
+			n = entry.getValue().getNumberOfPages();
+			for (int i = 0; i < n; ) {
+				pageNo++;
+				page = copy.getImportedPage(entry.getValue(), ++i);
+				stamp = copy.createPageStamp(page);
+				chunk = new Chunk(String.format("Seite %d", pageNo));
+				if (i == 1)
+					chunk.setLocalDestination("p" + pageNo);
+				ColumnText.showTextAligned(stamp.getUnderContent(),
+					Element.ALIGN_RIGHT, new Phrase(chunk),
+					559, 810, 0);
+				stamp.alterContents();
+				copy.addPage(page);
+			}
+		}
+		//close everything
+		document.close();
+		for (PdfReader r : files.values()) {
+			r.close();
+		}
+		copy.close();
+
+		File mergedFile = new File(fileName);
+		//add to garbage collector
+		generatedFiles.get(dirName).add(mergedFile);
+
+		return mergedFile;
+	}
+
+	public void deleteFiles(String id, List<File> optFiles) throws NoSuchAlgorithmException, IOException, DeletionException {
+			String dirName = generateFile(id);
+			if(generatedFiles.containsKey(dirName)) {
+				//delete each file
+				List<File> files = generatedFiles.get(dirName);
+				for(File file : files) {
+					file.delete();
+				}
+				//delete parent dir
+				File dir = new File("./tmp/" + dirName);
+				//check if empty
+				DirectoryStream<Path> dirStream = Files.newDirectoryStream(dir.toPath());
+				if(!dirStream.iterator().hasNext()) {
+					throw new DeletionException("parent not empty. error during deletion");
+				}
+				dir.delete();
+				//delete entry in garbage list
+				generatedFiles.remove(dirName);
+			}
+			//extra files found
+			if(optFiles != null && optFiles.size() > 0) {
+				for(File file : optFiles) {
+					file.delete();
+				}
+			}
 
 	}
 
