@@ -1,9 +1,11 @@
 package com.generali.outbound.service;
 
+import com.documents4j.api.DocumentType;
+import com.documents4j.api.IConverter;
+import com.documents4j.job.LocalConverter;
 import com.generali.outbound.domain.FormData;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Paragraph;
+import com.generali.outbound.exception.ConvertingException;
+import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.tool.xml.Pipeline;
 import com.itextpdf.tool.xml.XMLWorker;
@@ -25,7 +27,10 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.*;
 
 /**
  * Created by timdekarz on 03.04.17.
@@ -33,15 +38,67 @@ import java.util.List;
 @Service
 public class GenerationService {
 
+	private IConverter converter = null;
+		/*LocalConverter.builder()
+		.baseFolder(new File("./tmp"))
+		.workerPool(20, 25, 2, TimeUnit.SECONDS)
+		.processTimeout(5, TimeUnit.SECONDS)
+		.build();*/
+
+	private static Map<String, List<File>> generatedFiles = new HashMap<>();
+
+
+	public List<File> generateAll(FormData data) throws ConvertingException {
+
+		try {
+		List<File> files = new ArrayList<>();
+
+		//Prepare threads
+		int threadNum = 1;
+			if(data.getUploads().size() != 1 && !data.getUploads().get(0).getOriginalFilename().isEmpty()) {
+				threadNum += data.getUploads().size();
+			}
+		ExecutorService executor = Executors.newFixedThreadPool(threadNum);
+		List<FutureTask<File>> taskList = new ArrayList<>();
+
+		// Start thread for custom letter
+		FutureTask<File> letter = new FutureTask<>(
+			() -> generateLetter(data));
+		taskList.add(letter);
+		executor.execute(letter);
+
+		// Start thread if uploads available
+		if(!data.getUploads().get(0).getOriginalFilename().isEmpty()) {
+			for(MultipartFile file : data.getUploads()) {
+				FutureTask<File> upFile = new FutureTask<>(
+					() -> convertToPdf(data.getEmail(), file));
+				taskList.add(upFile);
+				executor.execute(upFile);
+			}
+		}
+
+		// Wait until all results are available and combine them at the same time
+		for (int j = 0; j < threadNum; j++) {
+			FutureTask<File> futureTask = taskList.get(j);
+			files.add(futureTask.get());
+		}
+		executor.shutdown();
+
+		return files; //return all files
+
+		} catch (Exception e) {
+			throw new ConvertingException(e.getMessage());
+		}
+	}
+
 	public File generateLetter(FormData data) throws IOException, DocumentException, NoSuchAlgorithmException {
 
 		Document document = new Document();
 		//TODO: Try to use a temp file here instead
-		String fileName = "./tmp/" + generateFile(data.getEmail()) + "/preview.pdf";
-		//TODO: This produces a dir not a file -> FIX
+		String dirName = generateFile(data.getEmail());
+		String fileName = "./tmp/" +  dirName + "/preview.pdf";
 		File file = new File(fileName);
 		if (!file.exists()) {
-			file.mkdirs();
 			file.createNewFile();
 		}
 		PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(file));
@@ -88,8 +145,10 @@ public class GenerationService {
 			document.add(e);
 		}*/
 
+		//TODO: add images to garbage list
+
 		//footer
-		if(data.getUploads().size() != 1 && !data.getUploads().get(0).getOriginalFilename().isEmpty()) {
+		if(!data.getUploads().get(0).getOriginalFilename().isEmpty()) {
 			spacer = new Paragraph(data.getUploads().size() +  " Anhänge");
 			spacer.setSpacingBefore(20f);
 			document.add(spacer);
@@ -98,17 +157,97 @@ public class GenerationService {
 		document.close();
 		writer.close();
 
+		//add for garbage collector
+		generatedFiles.get(dirName).add(file);
+
 		return file;
 	}
 
-	public List<File> convertToPdf(List<MultipartFile> uploads) {
+	public File convertToPdf(String id, MultipartFile file) throws ConvertingException, NoSuchAlgorithmException, IOException {
 
-		return new ArrayList<>();
+		String dirName = generateFile(id);
+
+		//valid file?
+		if(file.getOriginalFilename().isEmpty()) {
+			throw new ConvertingException("empty file given");
+		}
+
+		//success flag
+		boolean success = false;
+
+		//get basic data from file
+		String type = file.getContentType();
+		String[] temp = file.getOriginalFilename().split(".");
+		String rawName = "";
+		for(int i = 0; i < temp.length; i++) {
+			rawName += temp[i];
+		}
+
+		//generate file
+		String fileName = "./tmp/" + dirName + "/" + rawName + ".pdf";
+		File psFile = new File(fileName);
+		if (!psFile.exists()) {
+			psFile.createNewFile();
+		}
+
+		//dispatching file content type
+		if(type.contains("png") || type.contains("jpg") || type.contains("jpeg")) {
+			success = convertImageToPdf(file.getBytes(), psFile);
+		} else if(type.contains("doc") || type.contains("docx")) {
+			success = convertMSOfficeToPdf(file.getInputStream(), psFile, DocumentType.MS_WORD);
+		} else if(type.contains("xls") || type.contains("xlsx")) {
+			success = convertMSOfficeToPdf(file.getInputStream(), psFile, DocumentType.MS_EXCEL);
+		}
+		//TODO: add here support for powerpoint
+		else {
+			//unsupported type
+			//TODO: what should we do now?
+		}
+
+		//check success generation
+		if(success) {
+			throw new ConvertingException("unknown error during convertion. check log for details");
+		}
+
+		//add to garbage collector
+		generatedFiles.get(dirName).add(psFile);
+
+		return psFile;
 	}
 
-	private File convertWordToPdf(File file) {
+	private boolean convertMSOfficeToPdf(InputStream officeFile, File target, DocumentType type) {
 
-		return new File("");
+		return converter
+			.convert(officeFile).as(type)
+			.to(target).as(DocumentType.PDF)
+			.prioritizeWith(1000) // optional
+			.execute();
+
+	}
+
+	private boolean convertImageToPdf(byte[] imageFile, File target) {
+
+		try {
+			Document document = new Document();
+			PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(target));
+			document.open();
+
+			Image image = Image.getInstance(imageFile);
+			image.scaleToFit(595, 842);
+			image.setAbsolutePosition(0, 0);
+			document.add(image);
+			document.newPage();
+
+			document.close();
+			writer.close();
+		} catch (Exception e) {
+			return false;
+		}
+
+		return true;
+	}
+
+	public void deleteFiles(List<List> files) {
 
 	}
 
@@ -120,6 +259,12 @@ public class GenerationService {
 		if (!file.exists()) {
 			file.mkdirs();
 		}
+
+		//init list for garbage collector
+		if(!generatedFiles.containsKey(fileName)) {
+			generatedFiles.put(fileName, new ArrayList<>());
+		}
+
 		return fileName;
 	}
 

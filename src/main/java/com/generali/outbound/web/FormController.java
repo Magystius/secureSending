@@ -78,6 +78,18 @@ public class FormController {
 			model.put("errorList", errors);
 		} else {
 			//TODO: do something with your pdfs
+			try {
+				List<File> files = new ArrayList<>();
+				files.addAll(generationService.generateAll(data)); //use this method for parallel converting/generating
+			} catch (Exception e) {
+				populateModel(data, model);
+				model.put("failure", true);
+				errors = new ArrayList<>();
+				HashMap<String, String> error = new HashMap<>();
+				error.put("error", "Bei der Generierung ist ein unerwarteter Fehler aufgetreten");
+				errors.add(error);
+				model.put("errorList", errors);
+			}
 			populateModel(new FormData(), model);
 			model.put("success", true);
 		}
