@@ -3,10 +3,7 @@ package com.generali.outbound.service;
 import com.generali.outbound.domain.FormData;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -75,8 +72,8 @@ public class ValidationService {
 
 		if(!data.getUploads().get(0).getOriginalFilename().isEmpty()) {
 			data.getUploads().forEach((v) -> {
-				String[] temp = v.getOriginalFilename().split(".");
-				if(supportedFileTypes.toString().contains(temp[temp.length - 1])) {
+				String[] temp = v.getOriginalFilename().split("\\.");
+				if(!Arrays.toString(supportedFileTypes).contains(temp[temp.length - 1])) {
 					HashMap<String, String> error = new HashMap<>();
 					error.put("error", "Nicht unterstütztes Dateiformat: " + temp[temp.length - 1]);
 					error.put("field", "uploads");

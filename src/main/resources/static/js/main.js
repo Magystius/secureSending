@@ -62,8 +62,8 @@ $(document).ready(function() {
 		],
 		paste_data_images: true,
 		automatic_uploads: true,
-		images_upload_url: '/saveimage',
-		images_upload_base_path: '/getimage?image=',
+		images_upload_url: '/image',
+		images_upload_base_path: '/image?id=',
 		file_picker_types: 'image',
 		file_picker_callback: function(cb, value, meta) {
 			var input = document.createElement('input');

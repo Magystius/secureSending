@@ -1,35 +1,17 @@
 package com.generali.outbound.service;
 
-import com.documents4j.api.DocumentType;
-import com.documents4j.api.IConverter;
-import com.documents4j.job.LocalConverter;
+import com.generali.outbound.Utils;
 import com.generali.outbound.domain.FormData;
 import com.generali.outbound.exception.ConvertingException;
-import com.generali.outbound.exception.DeletionException;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
-import com.itextpdf.tool.xml.Pipeline;
-import com.itextpdf.tool.xml.XMLWorker;
 import com.itextpdf.tool.xml.XMLWorkerHelper;
-import com.itextpdf.tool.xml.html.Tags;
-import com.itextpdf.tool.xml.parser.XMLParser;
-import com.itextpdf.tool.xml.pipeline.css.CSSResolver;
-import com.itextpdf.tool.xml.pipeline.css.CssResolverPipeline;
-import com.itextpdf.tool.xml.pipeline.end.PdfWriterPipeline;
-import com.itextpdf.tool.xml.pipeline.html.AbstractImageProvider;
-import com.itextpdf.tool.xml.pipeline.html.HtmlPipeline;
-import com.itextpdf.tool.xml.pipeline.html.HtmlPipelineContext;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.*;
-import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,17 +25,13 @@ import java.util.concurrent.*;
 @Service
 public class GenerationService {
 
-	private IConverter converter = null;
-		/*LocalConverter.builder()
-		.baseFolder(new File("./tmp"))
-		.workerPool(20, 25, 2, TimeUnit.SECONDS)
-		.processTimeout(5, TimeUnit.SECONDS)
-		.build();*/
+	private final ConvertingService convertingService;
 
-	private static Map<String, List<File>> generatedFiles = new HashMap<>();
-
-
-	public List<File> generateAll(FormData data) throws ConvertingException {
+	@Autowired
+	public GenerationService(final ConvertingService convertingService) {
+		this.convertingService = convertingService;
+	}
+	public List<File> processAll(FormData data) throws ConvertingException {
 
 		try {
 		List<File> files = new ArrayList<>();
@@ -76,7 +54,7 @@ public class GenerationService {
 		if(!data.getUploads().get(0).getOriginalFilename().isEmpty()) {
 			for(MultipartFile file : data.getUploads()) {
 				FutureTask<File> upFile = new FutureTask<>(
-					() -> convertToPdf(data.getEmail(), file));
+					() -> convertingService.convertToPdf(data.getEmail(), file));
 				taskList.add(upFile);
 				executor.execute(upFile);
 			}
@@ -100,7 +78,7 @@ public class GenerationService {
 
 		Document document = new Document();
 		//TODO: Try to use a temp file here instead
-		String dirName = generateFile(data.getEmail());
+		String dirName = Utils.generateFile(data.getEmail());
 		String fileName = "./tmp/" +  dirName + "/preview.pdf";
 		File file = new File(fileName);
 		if (!file.exists()) {
@@ -141,119 +119,15 @@ public class GenerationService {
 		writer.close();
 
 		//add for garbage collector
-		generatedFiles.get(dirName).add(file);
+		Utils.addFileToGarbageCollector(dirName, file);
 
 		return file;
-	}
-
-	public File convertToPdf(String id, MultipartFile file) throws ConvertingException, NoSuchAlgorithmException, IOException {
-
-		String dirName = generateFile(id);
-
-		//valid file?
-		if(file.getOriginalFilename().isEmpty()) {
-			throw new ConvertingException("empty file given");
-		}
-
-		//success flag
-		boolean success = false;
-
-		//get basic data from file
-		String type = file.getContentType();
-		String[] temp = file.getOriginalFilename().split(".");
-		String rawName = "";
-		for(int i = 0; i < temp.length; i++) {
-			rawName += temp[i];
-		}
-
-		//generate file
-		String fileName = "./tmp/" + dirName + "/" + rawName + ".pdf";
-		File psFile = new File(fileName);
-		if (!psFile.exists()) {
-			psFile.createNewFile();
-		}
-
-		//dispatching file content type
-		if(type.contains("png") || type.contains("jpg") || type.contains("jpeg")) {
-			success = convertImageToPdf(file.getBytes(), psFile);
-		} else if(type.contains("doc") || type.contains("docx")) {
-			success = convertMSOfficeToPdf(file.getInputStream(), psFile, DocumentType.MS_WORD);
-		} else if(type.contains("xls") || type.contains("xlsx")) {
-			success = convertMSOfficeToPdf(file.getInputStream(), psFile, DocumentType.MS_EXCEL);
-		} else if(type.contains("pdf")) {
-			success = savePdf(file.getInputStream(), psFile);
-		}
-		//TODO: add here support for powerpoint
-		else {
-			//unsupported type
-			//TODO: what should we do now?
-		}
-
-		//check success generation
-		if(success) {
-			throw new ConvertingException("unknown error during convertion. check log for details");
-		}
-
-		//add to garbage collector
-		generatedFiles.get(dirName).add(psFile);
-
-		return psFile;
-	}
-
-	private boolean savePdf(InputStream source, File target) {
-
-		try {
-			byte[] buffer = new byte[source.available()];
-			source.read(buffer);
-
-			OutputStream outStream = new FileOutputStream(target);
-			outStream.write(buffer);
-			outStream.flush();
-			outStream.close();
-			source.close();
-		} catch (IOException e) {
-			return false;
-		}
-
-		return true;
-	}
-
-	private boolean convertMSOfficeToPdf(InputStream officeFile, File target, DocumentType type) {
-
-		return converter
-			.convert(officeFile).as(type)
-			.to(target).as(DocumentType.PDF)
-			.prioritizeWith(1000) // optional
-			.execute();
-
-	}
-
-	private boolean convertImageToPdf(byte[] imageFile, File target) {
-
-		try {
-			Document document = new Document();
-			PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(target));
-			document.open();
-
-			Image image = Image.getInstance(imageFile);
-			image.scaleToFit(595, 842);
-			image.setAbsolutePosition(0, 0);
-			document.add(image);
-			document.newPage();
-
-			document.close();
-			writer.close();
-		} catch (Exception e) {
-			return false;
-		}
-
-		return true;
 	}
 
 	public File mergeDir(String id) throws IOException, DocumentException, NoSuchAlgorithmException {
 
 		//prepare basic info
-		String dirName = generateFile(id);
+		String dirName = Utils.generateFile(id);
 		String fileName = "./tmp/" +  dirName + "/merged.pdf";
 
 		//open files
@@ -303,54 +177,8 @@ public class GenerationService {
 
 		File mergedFile = new File(fileName);
 		//add to garbage collector
-		generatedFiles.get(dirName).add(mergedFile);
+		Utils.addFileToGarbageCollector(dirName, mergedFile);
 
 		return mergedFile;
 	}
-
-	public void deleteFiles(String id, List<File> optFiles) throws NoSuchAlgorithmException, IOException, DeletionException {
-			String dirName = generateFile(id);
-			if(generatedFiles.containsKey(dirName)) {
-				//delete each file
-				List<File> files = generatedFiles.get(dirName);
-				for(File file : files) {
-					file.delete();
-				}
-				//delete parent dir
-				File dir = new File("./tmp/" + dirName);
-				//check if empty
-				DirectoryStream<Path> dirStream = Files.newDirectoryStream(dir.toPath());
-				if(!dirStream.iterator().hasNext()) {
-					throw new DeletionException("parent not empty. error during deletion");
-				}
-				dir.delete();
-				//delete entry in garbage list
-				generatedFiles.remove(dirName);
-			}
-			//extra files found
-			if(optFiles != null && optFiles.size() > 0) {
-				for(File file : optFiles) {
-					file.delete();
-				}
-			}
-
-	}
-
-	private String generateFile(String email) throws NoSuchAlgorithmException {
-		MessageDigest md5 = MessageDigest.getInstance("MD5");
-		md5.update(email.getBytes(),0,email.length());
-		String fileName = new BigInteger(1,md5.digest()).toString(16);
-		File file = new File("./tmp/" + fileName);
-		if (!file.exists()) {
-			file.mkdirs();
-		}
-
-		//init list for garbage collector
-		if(!generatedFiles.containsKey(fileName)) {
-			generatedFiles.put(fileName, new ArrayList<>());
-		}
-
-		return fileName;
-	}
-
 }
