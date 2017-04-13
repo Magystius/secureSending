@@ -3,19 +3,18 @@ package com.generali.outbound.domain;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by timdekarz on 29.03.17.
+ * Entity Class for User Input from Webform
+ * @author Tim Dekarz
  */
 @Getter
 @Setter
 public class FormData {
 
-	private String title;
+	private String title; //should be 'male' or 'female'
 
 	private String firstName;
 
@@ -25,16 +24,19 @@ public class FormData {
 
 	private String password;
 
-	private String task;
+	private String task; //should only be digits
 
-	private String insuranceId;
+	private String insuranceId; //should only be digits
 
 	private String subject;
 
 	private String message;
 
-	private List<MultipartFile> uploads;
+	private List<MultipartFile> uploads; //use multipartfile for spring upload support
 
+	/**
+	 * Standard constructur to ensure default values
+	 */
 	public FormData() {
 		this.title = "";
 		this.firstName = "";

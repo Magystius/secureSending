@@ -20,7 +20,9 @@ import java.util.Map;
 import java.util.concurrent.*;
 
 /**
- * Created by timdekarz on 03.04.17.
+ * Service for working with pdfs
+ * generates a custom letter from formdata
+ * @author Tim Dekarz
  */
 @Service
 public class GenerationService {
@@ -32,6 +34,13 @@ public class GenerationService {
 		this.convertingService = convertingService;
 	}
 
+	/**
+	 * Convience method to enable parallel converting
+	 * open threads for letter and uploads, runs them parallel and collect output
+	 * @param data - data to process
+	 * @return - list of generated files
+	 * @throws ConvertingException
+	 */
 	public List<File> processAll(FormData data) throws ConvertingException {
 
 		try {
@@ -39,6 +48,7 @@ public class GenerationService {
 
 		//Prepare threads
 		int threadNum = 1;
+			//if uploads present
 			if(data.getUploads().size() != 1 && !data.getUploads().get(0).getOriginalFilename().isEmpty()) {
 				threadNum += data.getUploads().size();
 			}
@@ -75,10 +85,18 @@ public class GenerationService {
 		}
 	}
 
+	/**
+	 * generated a custom letter in pdf format from form input
+	 * @param data - data to process
+	 * @return - generated file
+	 * @throws IOException
+	 * @throws DocumentException
+	 * @throws NoSuchAlgorithmException
+	 */
 	public File generateLetter(FormData data) throws IOException, DocumentException, NoSuchAlgorithmException {
 
+		//prepare doc and file to write to
 		Document document = new Document();
-		//TODO: Try to use a temp file here instead
 		String dirName = Utils.generateFile(data.getEmail());
 		String fileName = "./tmp/" +  dirName + "/preview.pdf";
 		File file = new File(fileName);
@@ -88,7 +106,7 @@ public class GenerationService {
 		PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(file));
 		document.open();
 
-		//header
+		//add meta data from form as header
 		document.add(new Paragraph("Kunde:"));
 		String title = (data.getTitle().equals("female")) ? "Frau" : "Herr";
 		document.add(new Paragraph(title + " " + data.getFirstName() + " " + data.getLastName()));
@@ -99,24 +117,26 @@ public class GenerationService {
 		document.add(new Paragraph("Vorgangsnummer: " + data.getTask()));
 		document.add(new Paragraph("Versicherungsnummer: " + data.getInsuranceId()));
 
-		//rich text
+		//add subject and messge from rtf editor
 		spacer = new Paragraph("Betreff: " + data.getSubject());
 		spacer.setSpacingBefore(20f);
 		document.add(spacer);
 
 		data.getMessage().replace("image?id=", "./img/"); //replace dynamic request url with local file path
+		//process with helper class from lib
 		InputStream messageStream = new ByteArrayInputStream(data.getMessage().getBytes(StandardCharsets.UTF_8));
 		XMLWorkerHelper.getInstance().parseXHtml(writer, document, messageStream, Charset.forName("cp1252"));
 
 		//TODO: add images to garbage list
 
-		//footer
+		//add footer if uploads present
 		if(!data.getUploads().get(0).getOriginalFilename().isEmpty()) {
 			spacer = new Paragraph(data.getUploads().size() +  " Anhänge");
 			spacer.setSpacingBefore(20f);
 			document.add(spacer);
 		}
 
+		//finishing stuff
 		document.close();
 		writer.close();
 
@@ -126,6 +146,15 @@ public class GenerationService {
 		return file;
 	}
 
+	/**
+	 * merges all files in a given dir to one pdf doc
+	 * This only works properly if all files are already pdfs!
+	 * @param id - dir name -> uses utils clsss
+	 * @return - generated merged file
+	 * @throws IOException
+	 * @throws DocumentException
+	 * @throws NoSuchAlgorithmException
+	 */
 	public File mergeDir(String id) throws IOException, DocumentException, NoSuchAlgorithmException {
 
 		//prepare basic info
@@ -136,7 +165,8 @@ public class GenerationService {
 		Map<String, PdfReader> files = new HashMap<>();
 		String[] fileNames = new File("./tmp/" + dirName).list();
 		for(String name : fileNames) {
-			files.put(name, new PdfReader(name));
+			//TODO: should we provide a check for pdfs here?
+			files.put(name, new PdfReader("./tmp/" + dirName + "/" + name)); //if we have a non pdf file present -> exception
 		}
 
 		//merge all files

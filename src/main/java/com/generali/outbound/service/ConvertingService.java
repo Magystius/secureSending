@@ -2,6 +2,7 @@ package com.generali.outbound.service;
 
 import com.documents4j.api.DocumentType;
 import com.documents4j.api.IConverter;
+import com.documents4j.job.LocalConverter;
 import com.generali.outbound.Utils;
 import com.generali.outbound.exception.ConvertingException;
 import com.itextpdf.text.Document;
@@ -9,26 +10,38 @@ import com.itextpdf.text.Image;
 import com.itextpdf.text.pdf.PdfWriter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.*;
 import java.security.NoSuchAlgorithmException;
+import java.util.concurrent.TimeUnit;
 
 /**
- * Created by Tim on 12.04.2017.
+ * Service Class for converting services
+ * Uses a dispatcher method to generate pdf files from given input files
+ * support: doc, docx, xls, xlsx, ppt, pptx, png, jpg, pdf
+ * @author Tim Dekarz
  */
 @Service
 public class ConvertingService {
 
-	private IConverter converter = null;
-		/*LocalConverter.builder()
+	//init local convert instance for office files; uses tmp dir for scripts
+	private IConverter converter = LocalConverter.builder()
 		.baseFolder(new File("./tmp"))
 		.workerPool(20, 25, 2, TimeUnit.SECONDS)
 		.processTimeout(5, TimeUnit.SECONDS)
-		.build();*/
+		.build();
 
+	/**
+	 * Main dispatcher method. generate a pdf file from given input
+	 * @param id - name if parent dir -> uses utils class
+	 * @param file -> input file to convert
+	 * @return -> pdf file
+	 * @throws ConvertingException
+	 * @throws NoSuchAlgorithmException
+	 * @throws IOException
+	 */
 	public File convertToPdf(String id, MultipartFile file) throws ConvertingException, NoSuchAlgorithmException, IOException {
 
-		String dirName = Utils.generateFile(id);
+		String dirName = Utils.generateFile(id); //get dir name
 
 		//valid file?
 		if(file.getOriginalFilename().isEmpty()) {
@@ -40,9 +53,9 @@ public class ConvertingService {
 
 		//get basic data from file
 		String type = file.getContentType();
-		String[] temp = file.getOriginalFilename().split(".");
+		String[] temp = file.getOriginalFilename().split("\\.");
 		String rawName = "";
-		for(int i = 0; i < temp.length; i++) {
+		for(int i = 0; i < temp.length - 1; i++) {
 			rawName += temp[i];
 		}
 
@@ -70,7 +83,7 @@ public class ConvertingService {
 		}
 
 		//check success generation
-		if(success) {
+		if(!success) {
 			throw new ConvertingException("unknown error during convertion. check log for details");
 		}
 
@@ -80,14 +93,20 @@ public class ConvertingService {
 		return psFile;
 	}
 
+	/**
+	 * just saves a pdf to disk
+	 * @param source - input stream to persist
+	 * @param target - file to write to
+	 * @return - indicator if converting was successful
+	 */
 	private boolean savePdf(InputStream source, File target) {
 
 		try {
 			byte[] buffer = new byte[source.available()];
-			source.read(buffer);
+			source.read(buffer); //read all bytes
 
 			OutputStream outStream = new FileOutputStream(target);
-			outStream.write(buffer);
+			outStream.write(buffer); //write to file
 			outStream.flush();
 			outStream.close();
 			source.close();
@@ -98,26 +117,42 @@ public class ConvertingService {
 		return true;
 	}
 
+	/**
+	 * convert a ms office file to pdf
+	 * @param officeFile - input stream of office file
+	 * @param target - file to write to
+	 * @param type - type of doc (doc or xls)
+	 * @return - indicator if converting was successful
+	 */
 	private boolean convertMSOfficeToPdf(InputStream officeFile, File target, DocumentType type) {
 
 		return converter
 			.convert(officeFile).as(type)
 			.to(target).as(DocumentType.PDF)
 			.prioritizeWith(1000) // optional
-			.execute();
+			.execute(); //alternative you can use an async approach
 
 	}
 
+	/**
+	 * convert an image to pdf
+	 * supports png, jpg
+	 * @param imageFile - byte data of image
+	 * @param target - file to write to
+	 * @return - indicator wether converting was successful or not
+	 */
 	private boolean convertImageToPdf(byte[] imageFile, File target) {
 
 		try {
+			//prepare and open new pdf
 			Document document = new Document();
 			PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(target));
 			document.open();
 
+			//use itext image for optimal results
 			Image image = Image.getInstance(imageFile);
-			image.scaleToFit(595, 842);
-			image.setAbsolutePosition(0, 0);
+			image.scaleToFit(595, 842); //set to A4 format
+			image.setAbsolutePosition(0, 0); //bottom-left
 			document.add(image);
 			document.newPage();
 

@@ -1,7 +1,8 @@
 package com.generali.outbound.exception;
 
 /**
- * Created by timdekarz on 12.04.17.
+ * Custom Exception for Deletion Errors
+ * @author Tim Dekarz
  */
 public class DeletionException extends Exception {
 

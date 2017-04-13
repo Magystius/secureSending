@@ -1,7 +1,8 @@
 package com.generali.outbound.exception;
 
 /**
- * Created by timdekarz on 10.04.17.
+ * Custom Exception for Converting Errors
+ * @author Tim Dekarz
  */
 public class ConvertingException extends Exception {
 
