@@ -31,6 +31,7 @@ public class GenerationService {
 	public GenerationService(final ConvertingService convertingService) {
 		this.convertingService = convertingService;
 	}
+
 	public List<File> processAll(FormData data) throws ConvertingException {
 
 		try {

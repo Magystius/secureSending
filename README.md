@@ -1,134 +1,91 @@
-# IAA Hausarbeit
-Umsetzung der Hausarbeit für das Fach "Internet Anwendungsarchitekturen"
+# Secure Sending
+This repository contains an application for providing an easy way to send personal, protect-worthy
+information to customers or prospective clients. 
 
-_Hinweis:_ Ein kurzer Leitfaden findet sich am Ende der Installationsanleitung
+Its a technical use case study to develop a proof-of-concept prototyp for this kind of application.
+Therefore see this app as what it is - just a prototyp and not ready for production - but feel free
+to adapt and expand this app for your own needs (see *LICENSE, TECHNICAL DETAILS AND NOTES*).
 
-## Autoren
-Celina Runge, Lisa Cannon, Timo Kruth, Tim Dekarz
+## Authors
+Tim Dekarz
 
-## Aufgabenstellung
-Für die Bibliothek der Nordakademie soll ein neues Verwaltungssystem eingeführt werden, dass die
-Verwaltung des Bücherbestands und die Verfolgung der Leihvorgänge ermöglicht.
-Aufgabe der Hausarbeit ist die DV-technische Konzeption und anschließende Realisierung der
-nachfolgend aufgezählten Anwendungsfälle im Rahmen einer neuen, webbasierten Anwendung.
+## Key functions and Context
+Companies have do deal with customers who want to recieve personal information via e-mail on a daily 
+ basis. Wether its the latest invoice or - even more critical - information about private health insurances of 
+ financial details.
+ 
+ This use case study tries to solve this problem with an easy to use webbased application. 
+ 
+ **Key Functions:**
+ * Webform for entering customer details.
+ * WYSIWYG-Editor to write a personal cover letter on-the-fly
+ * Embed images directly into the letter - e.g. screenshots, logos
+ * Upload multiple files as appendix (docx, xlsx, pptx, jpg, png -> get converted to pdf)
+ * Generate a pdf-file from form inputs
+ * Preview function
+ * Merge all files into a single pdf
+ * Send a e-mail with a personal link to the customer *TODO*
+ * Provide secure acces to remote files via previously set one-time password *TODO*
 
 ## Requirements
-Zum Inbetriebnehmen der Anwendung müssen zunächst die folgenden Programme installiert werden:
+For proper usage and installation please make sure you have the following installled first:
 
-1. [Git](https://git-scm.com/download/win) installieren
-2. [Node.js](https://nodejs.org/en/) installieren
-3. [JDK](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html) installieren
-4. [Tomcat](http://tomcat.apache.org/download-80.cgi) installieren
-5. [IntelliJ IDEA Ultimate](https://www.jetbrains.com/idea/download/) installieren
+1. install [Git](https://git-scm.com/download/win)
+2. install [Node.js](https://nodejs.org/en/)
+3. install [JDK](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
+5. install [IntelliJ IDEA Ultimate](https://www.jetbrains.com/idea/download/) 
 
-Checke die korrekte Installation mit `git --version`, `node -v` und `npm -v`
-_Hinweis: Terminal öffnen (entweder unten in der Symbolleiste oder oben auf View<Tool Windows<Terminal)_
+_TODO_
+**Note:** A prepacked, ready to run app is located in the dist directory
 
-## Installation Abhängigkeiten
-Die Abhängigkeiten fürs Backend werden von Maven verwaltet und sollten von IntelliJ
-automatisch installiert werden. Bei Bedarf können diese per Rechtsklick auf die 'pom.xml'
-manuell nachinstalliert werden.
-Die Abhänigkeiten fürs Frontend müssen manuell installiert werden. Dazu müssen
-nacheinander folgende Befehle per Kommandozeile ausgeführt werden, sind bower und gulp
-bereits installiert, können die Schritte 2-6 ignoriert werden:
+## Install Depedencies
+IntelliJ - or any other IDE - should import the maven dependencies automaticly.
+Maybe you need to install bower first before import the frontend dependencies, otherwise just
+run the install command.
 
-1. `npm install`,
-2. `npm install -g bower`,
-3. `npm install -g gulp`,
-4. `npm install -g gulp-cli`,
-5. `bower install`,
-6. `gulp`
+1. (`npm install -g bower`),
+2. `bower install`,
 
-Erst dann sind alle Abhängigkeiten fürs Frontend installiert. evtl. Warnungen können ignoriert werden,
-Fehler nicht ;)
+**NOTE:** As WYSIWYG-Editor 'tinymce' is used. please have a look at their docs, 
+if you need a localization! 
 
-## Konfiguration IntelliJ
-Konfigure das Projekt in IntelliJ analog zum Beispielprojekt in der Vorlesung.
-Als Wurzelverzeichnis für den Tomcat Server muss '/' angegeben werden.
+## Technical Details
+Please take a look at the javadoc and inline comments!
 
-## Datenbank
-Die Anwendung nutzt eine **H2** Datenbank. Eventuell müssen dafür notwendige
-Treiber in IntelliJ installiert werden.
+Main purpose of this project for me was - besides fullfilling the requirements - testing some
+libraries ;-) Therefore, credits goes to:
+- Spring Boot
+- Lombok
+- iText
+- Documents4j
+- jQuery
+- Materialize
+- tinymce
 
-**Die Anwendung setzt einen minimalen Datenbestand voraus!**
-Dieser kann über das sich im Ordner 'db' befindliche SQL-Skript erstellt werden,
-dazu einfach per Rechtsklick das Skript ausführen ('run').
+Visit their sites and docs for further information.
 
-Alternativ kann die bereits vorhandene db genutzt werden.
+Altthough their isnt too much source code take a quick look at some interesting features:
 
-Zunächst muss der Pfad zur Datenbank in der 'spring.xml' angepasst werden!
-Sicherstellen, dass die Zeile `<prop key="hibernate.hbm2ddl.auto">update</prop>` genauso aussieht.
+As you would guess the validationService validates all the user input data. As this is a prototyp
+its pretty basic and you probably would like to add some more features here. As it goes for the rest
+of the application, security wasnt a main concern. so neither the files nor the html-string are checked
+in any way. And, as for now, the uploaded and generated files, including embedded images lay temporarily
+on the server and are accessible without any further authentifaction.
 
-## Hinweise
-Zur Anmeldung am System stehen folgende, initiale Nutzer zur Verfügung:
+Speaking of files. Currently all generated pdfs and images are written as persistent files on your disk.
+You have to considerate between in-memory handling with possibly huge ram usage - depends on 
+the concurrent number of users - and many I/O-Operations. Your choice ;)
 
-**Standardnutzer -> Admin:**
-admin.admin@nordakademie.de
-Passwort1!
+For the generation and merging of the pdf-files the itext library is used. It works satisfactory,
+but you may need to change this depending on your requirements.
+Same with the converting. I`ve tried some libraries and none of them were providing the results I wanted.
+So I came up with documents4j. A library which basically runs a script to call the native ms-office function.
+This approach obviously brings some disadvantages with it. You need a copy of ms-office on your
+maschine and its only runnable on windows. Their is a remote-call feature, but I havent tried it out
+yet. **NOTE:** _Please keep an eye one the MS-Office EULA and their restrictions of usage with other programs_
 
-**Student -> nur Listenansicht möglich**
-thomas.heinze@nordakademie.de
-Passwort1!
-
-Diese **Installationsanleitung**, das **Pflichtenheft** und weitere
-Unterlagen befinden sich im 'doc'-Verzeichnis.
-
-Die Anwendung verfügt über ein wahnsinnig lustiges Easteregg, welches
-mittels Eingabe des "Konami-Codes" aktiviert werden kann.
-
-Die Anwendung wurde mit den folgenden Browsern getestet:
-**Mozilla Firefox** & **Google Chrome**
-Bei anderen Browsern wird für evtl. Darstellungsfehler keine
-Garantie übernommen
-_Hinweis:_ Aufgrund eines Bugs funktionieren in Firefox die Dialoge
-nicht. Zum Testen wird daher geraten Chrome zu nutzen!
-
-## Development
-Im folgenden finden sich Hinweise zum Development der Anwendung
-
-### Gulp Tasks
-Folgende Gulp Tasks stehen zur Entwicklung zur Verfügung:
-
-1. `gulp copy` - kopiert alle bower pakete ins webapp verzeichnis
-2. `gulp css` - erstellt eine produktionsreife app.min.css Datei im webapp Verzeichnis
-3. `gulp js` - erstellt eine produktionsreife app.min.js Datei im webapp Verzeichnis
-4. `gulp lint` - Statische JS Codeanalyse
-
-Alle Tasks stehen ebenfalls als 'npm'-Tasks zur Verfügung.
-
-# Basic Usage
-## Anmeldung
-Die App bietet für Studenten eine einfache Listenansicht aller Publikationen
-sowie eine Übersicht der eigenen Ausleihvorgänge.
-
-Administrationen und Mitarbeiter haben Zugriff auf alle Funktionen der eigentlichen Anwendung.
-
-##Dashboard
-Die Anwendung verfügt über ein zentrales Dashboard auf dem alle relevanten Informationen
-zusammengefasst sind. Erweiterte Statistiken lassen sich über die 'Analytics' Seite aufrufen.
-Die drei Buttons über dem Seitenmenü bieten die Möglichkeit jederzeit einen Überblick
-über offene Mahnungen, überfällige Ausleihen sowie den freien Bestand zu erhalten.
-
-##Bestand
-Im Bereich 'Publikationen' kann der Bestand der Bibliothek verwaltet werden.
-Eine eigene Administrationsebene bietet die Möglichkeit Schlagwörter und Kategorien
-zu verwalten. Über die Detailansicht lassen sich neue Ausleihen anstoßen bzw. offene
-anschauen
-
-##Nutzer
-Im Bereich 'Nutzer' können Nutzer verwaltet werden. Die Rolle der Nutzer
-entscheidet über die Rechte in der Anwendung. Der volle Funktionsumfang ist
-für Administratoren und Mitarbeiter freigeschaltet. Über die Detailansicht
-können offene Ausleihen angezeigt bzw. neue eröffnet werden.
-
-##Verleihwesen
-Im Bereich 'Verleihwesen' können die Ausleihen verwaltet werden. Sowohl über die Listenansicht,
-als auch in der Detailansicht können Ausleihen verlängert, geschlossen, als verloren markiert
-und ein neues Mahnverfahren eröffnet bzw. eine neue Mahnung verschickt werden. Bitte beachten, dass
-die einzelnen Aktionen in Abhängigkeit vom jeweiligen, aktuellen Status zur Verfügung stehen.
-Eine eigene Administrationsebene bietet die Möglichkeit u.a. Verleihperioden zu ändern.
-
-##Allgemeines
-Die Anwendung verfügt über eine zentrale Suche.
-
-Weitere Informationen finden sich auf der FAQ-Seite der Anwendung.
+## TODOS
+* Add Mailing Service for sending a mail with personal link to customer
+* Provide one-time access to files 
+* Authentification of customer with password
+* Encrypt the pdf ?
