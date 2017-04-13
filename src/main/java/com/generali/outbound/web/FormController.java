@@ -87,13 +87,13 @@ public class FormController {
 			//TODO: do something with your pdfs
 			try {
 				List<File> files = new ArrayList<>();
-				//files.addAll(generationService.processAll(data)); //use this method for parallel converting/generating
-				files.add(generationService.generateLetter(data));
+				files.addAll(generationService.processAll(data)); //use this method for parallel converting/generating
+				/*files.add(generationService.generateLetter(data));
 				if(!data.getUploads().get(0).getOriginalFilename().isEmpty()) {
 					for(MultipartFile file : data.getUploads()) {
 						files.add(convertingService.convertToPdf(data.getEmail(), file));
 					}
-				}
+				}*/
 				generationService.mergeDir(data.getEmail()); // use mail as dir id to merge all previously generated docs
 				//TODO: send to somewhere
 				//Utils.deleteFiles(data.getEmail(), null); //delete temp files

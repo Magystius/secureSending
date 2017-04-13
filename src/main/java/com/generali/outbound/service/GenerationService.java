@@ -123,7 +123,6 @@ public class GenerationService {
 		document.add(spacer);
 
 		data.setMessage(data.getMessage().replace("image?id=", "./img/")); //replace dynamic request url with local file path
-		System.out.println(data.getMessage());
 		//process with helper class from lib
 		InputStream messageStream = new ByteArrayInputStream(data.getMessage().getBytes(StandardCharsets.UTF_8));
 		XMLWorkerHelper.getInstance().parseXHtml(writer, document, messageStream, Charset.forName("cp1252"));
