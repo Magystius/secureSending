@@ -122,7 +122,7 @@ public class GenerationService {
 		spacer.setSpacingBefore(20f);
 		document.add(spacer);
 
-		data.getMessage().replace("image?id=", "./img/"); //replace dynamic request url with local file path
+		data.setMessage(data.getMessage().replace("image?id=", "./img/")); //replace dynamic request url with local file path
 		//process with helper class from lib
 		InputStream messageStream = new ByteArrayInputStream(data.getMessage().getBytes(StandardCharsets.UTF_8));
 		XMLWorkerHelper.getInstance().parseXHtml(writer, document, messageStream, Charset.forName("cp1252"));

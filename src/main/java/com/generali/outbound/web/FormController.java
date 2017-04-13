@@ -70,11 +70,11 @@ public class FormController {
 		data.getUploads().forEach(v -> logger.info(v.getOriginalFilename()));
 		//TODO: Delete MOCKUP
 		//Pause for 4 seconds
-		try {
+		/*try {
 			Thread.sleep(4000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
-		}
+		}*/
 
 		//validation
 		List<Map<String, String>> errors = validationService.validateInput(data);
