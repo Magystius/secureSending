@@ -1,0 +1,5 @@
+com.generali.outbound
+com.generali.outbound.domain
+com.generali.outbound.exception
+com.generali.outbound.service
+com.generali.outbound.web

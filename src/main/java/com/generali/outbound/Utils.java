@@ -2,7 +2,6 @@ package com.generali.outbound;
 
 import com.generali.outbound.domain.FormData;
 import com.generali.outbound.exception.DeletionException;
-
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -17,20 +16,35 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by Tim on 12.04.2017.
+ * Util Class with misc methods
+ * TODO: probably better class design possible
+ * @author Tim Dekarz
  */
 public class Utils {
 
-	private static Map<String, List<File>> generatedFiles = new HashMap<>();
+	private static Map<String, List<File>> generatedFiles = new HashMap<>(); //list for garbage collector
 
+	/**
+	 * add a file to garbage collector list
+	 * @param dir - parent dir as key
+	 * @param file - file object for deletetion
+	 */
 	public static void addFileToGarbageCollector(String dir, File file) {
+		//check if valid file
 		if(dir != null && !dir.isEmpty() && file != null) {
 			generatedFiles.get(dir).add(file);
 		}
 	}
 
+	/**
+	 * prepares map with form data for web form
+	 * @param data - form data
+	 * @param model - map to populate
+	 * @return - filled map
+	 */
 	public static Map<String, Object> populateModel(FormData data, Map<String, Object> model) {
 
+		//title choose
 		Boolean titleUnselected, titleFemale, titleMale;
 		titleUnselected = !data.getTitle().equals("female") && !data.getTitle().equals("male");
 		titleFemale = data.getTitle().equals("female");
@@ -57,10 +71,17 @@ public class Utils {
 		return model;
 	}
 
+	/**
+	 * generate dir for files via hash
+	 * @param email - id as hash base
+	 * @return - string of dirName
+	 * @throws NoSuchAlgorithmException
+	 */
 	public static String generateFile(String email) throws NoSuchAlgorithmException {
 		MessageDigest md5 = MessageDigest.getInstance("MD5");
 		md5.update(email.getBytes(),0,email.length());
-		String fileName = new BigInteger(1,md5.digest()).toString(16);
+		String fileName = new BigInteger(1,md5.digest()).toString(16); //hash fileName
+		//create parent dir
 		File file = new File("./tmp/" + fileName);
 		if (!file.exists()) {
 			file.mkdirs();
@@ -74,8 +95,17 @@ public class Utils {
 		return fileName;
 	}
 
+	/**
+	 * delete method for old files
+	 * @param id - parent dir -> uses utils class
+	 * @param optFiles - optional files to delete
+	 * @throws NoSuchAlgorithmException
+	 * @throws IOException
+	 * @throws DeletionException
+	 */
 	public static void deleteFiles(String id, List<File> optFiles) throws NoSuchAlgorithmException, IOException, DeletionException {
-		String dirName = generateFile(id);
+		String dirName = generateFile(id); //get dirName
+		//check garbage collector
 		if(generatedFiles.containsKey(dirName)) {
 			//delete each file
 			List<File> files = generatedFiles.get(dirName);
