@@ -9,9 +9,9 @@
     "mail"
   ],
   "authors": [
-    "Tim Dekarz (v102180)"
+    "Tim Dekarz"
   ],
-  "license": "Generali Property",
+  "license": "MIT License",
   "homepage": "",
   "private": true,
   "ignore": [

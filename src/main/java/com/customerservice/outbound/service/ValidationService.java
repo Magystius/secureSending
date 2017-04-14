@@ -1,6 +1,6 @@
-package com.generali.outbound.service;
+package com.customerservice.outbound.service;
 
-import com.generali.outbound.domain.FormData;
+import com.customerservice.outbound.domain.FormData;
 import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -66,17 +66,17 @@ public class ValidationService {
 			errors.add(error);
 		}
 		//CHECK TASKID
-		if(!data.getTask().matches("[0-9]+")) {
+		if(!data.getTaskId().matches("[0-9]+")) {
 			HashMap<String, String> error = new HashMap<>();
 			error.put("error", "Die Vorgangsnummer darf nur Zahlen enthalten");
-			error.put("field", "task");
+			error.put("field", "taskId");
 			errors.add(error);
 		}
 		//CHECK INSURANCEID
-		if(!data.getInsuranceId().matches("[0-9]+")) {
+		if(!data.getContractId().matches("[0-9]+")) {
 			HashMap<String, String> error = new HashMap<>();
 			error.put("error", "Die Versicherungsnummer darf nur Zahlen enthalten");
-			error.put("field", "insuranceId");
+			error.put("field", "contractId");
 			errors.add(error);
 		}
 

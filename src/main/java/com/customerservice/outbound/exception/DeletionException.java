@@ -1,4 +1,4 @@
-package com.generali.outbound.exception;
+package com.customerservice.outbound.exception;
 
 /**
  * Custom Exception for Deletion Errors

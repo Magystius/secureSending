@@ -1,4 +1,4 @@
-package com.generali.outbound.domain;
+package com.customerservice.outbound.domain;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -24,9 +24,9 @@ public class FormData {
 
 	private String password;
 
-	private String task; //should only be digits
+	private String taskId; //should only be digits
 
-	private String insuranceId; //should only be digits
+	private String contractId; //should only be digits
 
 	private String subject;
 
@@ -43,8 +43,8 @@ public class FormData {
 		this.lastName = "";
 		this.email = "";
 		this.password = "";
-		this.task = "";
-		this.insuranceId = "";
+		this.taskId = "";
+		this.contractId = "";
 		this.subject = "";
 		this.message = "";
 		this.uploads = new ArrayList<>();

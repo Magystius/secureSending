@@ -1,10 +1,10 @@
-package com.generali.outbound.service;
+package com.customerservice.outbound.service;
 
+import com.customerservice.outbound.Utils;
+import com.customerservice.outbound.exception.ConvertingException;
 import com.documents4j.api.DocumentType;
 import com.documents4j.api.IConverter;
 import com.documents4j.job.LocalConverter;
-import com.generali.outbound.Utils;
-import com.generali.outbound.exception.ConvertingException;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.Image;
 import com.itextpdf.text.pdf.PdfWriter;

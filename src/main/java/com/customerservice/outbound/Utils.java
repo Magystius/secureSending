@@ -1,7 +1,8 @@
-package com.generali.outbound;
+package com.customerservice.outbound;
 
-import com.generali.outbound.domain.FormData;
-import com.generali.outbound.exception.DeletionException;
+import com.customerservice.outbound.domain.FormData;
+import com.customerservice.outbound.exception.DeletionException;
+
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -59,8 +60,8 @@ public class Utils {
 		model.put("email", data.getEmail());
 		model.put("password", data.getPassword());
 
-		model.put("task", data.getTask());
-		model.put("insuranceId", data.getInsuranceId());
+		model.put("taskId", data.getTaskId());
+		model.put("contractId", data.getContractId());
 
 		model.put("subject", data.getSubject());
 		model.put("message", data.getMessage());

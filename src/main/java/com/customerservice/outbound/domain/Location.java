@@ -1,4 +1,4 @@
-package com.generali.outbound.domain;
+package com.customerservice.outbound.domain;
 
 import lombok.Getter;
 import lombok.Setter;

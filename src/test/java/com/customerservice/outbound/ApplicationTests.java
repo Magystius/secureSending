@@ -1,4 +1,4 @@
-package com.generali.outbound;
+package com.customerservice.outbound;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

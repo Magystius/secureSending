@@ -1,9 +1,9 @@
-package com.generali.outbound.web;
+package com.customerservice.outbound.web;
 
-import com.generali.outbound.Utils;
-import com.generali.outbound.domain.FormData;
-import com.generali.outbound.service.GenerationService;
-import com.generali.outbound.service.ValidationService;
+import com.customerservice.outbound.service.ValidationService;
+import com.customerservice.outbound.Utils;
+import com.customerservice.outbound.domain.FormData;
+import com.customerservice.outbound.service.GenerationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

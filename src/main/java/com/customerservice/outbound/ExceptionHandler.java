@@ -1,4 +1,4 @@
-package com.generali.outbound;
+package com.customerservice.outbound;
 
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.multipart.MultipartException;
@@ -41,8 +41,8 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
 		boolean telSelect = !(data.get("telephone")[0] == null || data.get("telephone")[0].isEmpty());
 		model.put("telSelect", telSelect);
 
-		model.put("task", data.get("task")[0]);
-		model.put("insuranceId", data.get("insuranceId")[0]);
+		model.put("taskId", data.get("taskId")[0]);
+		model.put("contractId", data.get("contractId")[0]);
 
 		model.put("success", false);
 		model.put("failure", false);

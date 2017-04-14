@@ -1,17 +1,16 @@
-package com.generali.outbound.web;
+package com.customerservice.outbound.web;
 
-import com.generali.outbound.Utils;
-import com.generali.outbound.domain.FormData;
-import com.generali.outbound.service.ConvertingService;
-import com.generali.outbound.service.GenerationService;
-import com.generali.outbound.service.ValidationService;
+import com.customerservice.outbound.domain.FormData;
+import com.customerservice.outbound.service.GenerationService;
+import com.customerservice.outbound.service.ValidationService;
+import com.customerservice.outbound.Utils;
+import com.customerservice.outbound.service.ConvertingService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.util.*;

@@ -1,6 +1,6 @@
-package com.generali.outbound.web;
+package com.customerservice.outbound.web;
 
-import com.generali.outbound.domain.Location;
+import com.customerservice.outbound.domain.Location;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -54,7 +54,8 @@ public class ImageController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/image", method = RequestMethod.POST, produces = "application/json")
-	public @ResponseBody Location saveImage(@ModelAttribute MultipartFile file, HttpServletResponse response) throws Exception {
+	public @ResponseBody
+	Location saveImage(@ModelAttribute MultipartFile file, HttpServletResponse response) throws Exception {
 
 		//detect type of file
 		String type;

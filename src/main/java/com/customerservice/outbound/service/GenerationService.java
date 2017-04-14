@@ -1,8 +1,8 @@
-package com.generali.outbound.service;
+package com.customerservice.outbound.service;
 
-import com.generali.outbound.Utils;
-import com.generali.outbound.domain.FormData;
-import com.generali.outbound.exception.ConvertingException;
+import com.customerservice.outbound.Utils;
+import com.customerservice.outbound.domain.FormData;
+import com.customerservice.outbound.exception.ConvertingException;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
 import com.itextpdf.tool.xml.XMLWorkerHelper;
@@ -114,8 +114,8 @@ public class GenerationService {
 		Paragraph spacer = new Paragraph("Kennzeichen:");
 		spacer.setSpacingBefore(12f);
 		document.add(spacer);
-		document.add(new Paragraph("Vorgangsnummer: " + data.getTask()));
-		document.add(new Paragraph("Versicherungsnummer: " + data.getInsuranceId()));
+		document.add(new Paragraph("Vorgangsnummer: " + data.getTaskId()));
+		document.add(new Paragraph("Versicherungsnummer: " + data.getContractId()));
 
 		//add subject and messge from rtf editor
 		spacer = new Paragraph("Betreff: " + data.getSubject());

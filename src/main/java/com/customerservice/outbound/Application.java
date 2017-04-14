@@ -1,4 +1,4 @@
-package com.generali.outbound;
+package com.customerservice.outbound;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
