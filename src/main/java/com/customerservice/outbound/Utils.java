@@ -90,7 +90,7 @@ public class Utils {
 
 		//init list for garbage collector
 		if(!generatedFiles.containsKey(fileName)) {
-			generatedFiles.put(fileName, new ArrayList<>());
+			generatedFiles.put(fileName, new ArrayList<File>());
 		}
 
 		return fileName;

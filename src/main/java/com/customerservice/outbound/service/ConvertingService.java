@@ -8,8 +8,15 @@ import com.documents4j.job.LocalConverter;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.Image;
 import com.itextpdf.text.pdf.PdfWriter;
+import org.apache.poi.xslf.usermodel.XMLSlideShow;
+import org.apache.poi.xslf.usermodel.XSLFSlide;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.TimeUnit;
@@ -67,16 +74,17 @@ public class ConvertingService {
 		}
 
 		//dispatching file content type
-		if(type.contains("png") || type.contains("jpg") || type.contains("jpeg")) {
+		if(type.equalsIgnoreCase("image/png") || type.equalsIgnoreCase("image/jpeg")) {
 			success = convertImageToPdf(file.getBytes(), psFile);
-		} else if(type.contains("doc") || type.contains("docx")) {
+		} else if(type.equalsIgnoreCase("application/msword") || type.equalsIgnoreCase("application/vnd.openxmlformats-officedocument.wordprocessingml.document")) {
 			success = convertMSOfficeToPdf(file.getInputStream(), psFile, DocumentType.MS_WORD);
-		} else if(type.contains("xls") || type.contains("xlsx")) {
+		} else if(type.equalsIgnoreCase("application/vnd.ms-excel") || type.equalsIgnoreCase("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) {
 			success = convertMSOfficeToPdf(file.getInputStream(), psFile, DocumentType.MS_EXCEL);
-		} else if(type.contains("pdf")) {
+		} else if(type.equalsIgnoreCase("application/vnd.ms-powerpoint") || type.equalsIgnoreCase("application/vnd.openxmlformats-officedocument.presentationml.presentation")) {
+			success = convertSlideShowToPdf(file.getInputStream(), psFile);
+		} else if(type.equalsIgnoreCase("application/pdf")) {
 			success = savePdf(file.getInputStream(), psFile);
 		}
-		//TODO: add here support for powerpoint
 		else {
 			//unsupported type
 			//TODO: what should we do now?
@@ -132,6 +140,52 @@ public class ConvertingService {
 			.prioritizeWith(1000) // optional
 			.execute(); //alternative you can use an async approach
 
+	}
+
+	private boolean convertSlideShowToPdf(InputStream slideShow, File target) {
+
+		try {
+			//init slide object
+			XMLSlideShow ppt = new XMLSlideShow(slideShow);
+
+			//prepare and open new pdf
+			Document document = new Document();
+			PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(target));
+			document.open();
+
+			//getting the dimensions and size of the slide
+			Dimension pgsize = ppt.getPageSize();
+			XSLFSlide[] slide = ppt.getSlides().toArray(new XSLFSlide[0]);
+
+			for (int i = 0; i < slide.length; i++) {
+				BufferedImage img = new BufferedImage(pgsize.width, pgsize.height, BufferedImage.TYPE_INT_RGB);
+				Graphics2D graphics = img.createGraphics();
+
+				//clear the drawing area
+				graphics.setPaint(Color.white);
+				graphics.fill(new Rectangle2D.Float(0, 0, pgsize.width, pgsize.height));
+
+				//render
+				slide[i].draw(graphics);
+
+				//convert to byte[]
+				ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+				ImageIO.write(img, "png", byteOut);
+				//use itext image for optimal results
+				Image image = Image.getInstance(byteOut.toByteArray());
+				image.scaleToFit(595, 842); //set to A4 format
+				image.setAbsolutePosition(0, 0); //bottom-left
+				document.add(image);
+				document.newPage();
+			}
+
+			document.close();
+			writer.close();
+		} catch (Exception e) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**

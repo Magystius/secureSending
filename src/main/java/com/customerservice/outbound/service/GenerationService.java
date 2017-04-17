@@ -41,7 +41,7 @@ public class GenerationService {
 	 * @return - list of generated files
 	 * @throws ConvertingException
 	 */
-	public List<File> processAll(FormData data) throws ConvertingException {
+	public List<File> processAll(final FormData data) throws ConvertingException {
 
 		try {
 		List<File> files = new ArrayList<>();
@@ -56,16 +56,32 @@ public class GenerationService {
 		List<FutureTask<File>> taskList = new ArrayList<>();
 
 		// Start thread for custom letter
-		FutureTask<File> letter = new FutureTask<>(
-			() -> generateLetter(data));
+		FutureTask<File> letter = new FutureTask<>(new Callable<File>() {
+				@Override
+				public File call() {
+					try {
+						return generateLetter(data);
+					} catch (Exception e) {
+						return null;
+					}
+				}
+			});
 		taskList.add(letter);
 		executor.execute(letter);
 
 		// Start thread if uploads available
 		if(!data.getUploads().get(0).getOriginalFilename().isEmpty()) {
-			for(MultipartFile file : data.getUploads()) {
-				FutureTask<File> upFile = new FutureTask<>(
-					() -> convertingService.convertToPdf(data.getEmail(), file));
+			for(final MultipartFile file : data.getUploads()) {
+				FutureTask<File> upFile = new FutureTask<>(new Callable<File>() {
+						@Override
+						public File call() {
+							try {
+								return convertingService.convertToPdf(data.getEmail(), file);
+							} catch (Exception e) {
+								return null;
+							}
+						}
+					});
 				taskList.add(upFile);
 				executor.execute(upFile);
 			}

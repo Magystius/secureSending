@@ -66,7 +66,6 @@ public class FormController {
 	@RequestMapping(value = "/form", method = RequestMethod.POST)
 	public String submit(@ModelAttribute FormData data, Map<String, Object> model) {
 
-		data.getUploads().forEach(v -> logger.info(v.getOriginalFilename()));
 		//TODO: Delete MOCKUP
 		//Pause for 4 seconds
 		/*try {
