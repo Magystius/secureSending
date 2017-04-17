@@ -7,6 +7,7 @@ import com.documents4j.api.IConverter;
 import com.documents4j.job.LocalConverter;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.Image;
+import com.itextpdf.text.PageSize;
 import com.itextpdf.text.pdf.PdfWriter;
 import org.apache.poi.xslf.usermodel.XMLSlideShow;
 import org.apache.poi.xslf.usermodel.XSLFSlide;
@@ -149,7 +150,7 @@ public class ConvertingService {
 			XMLSlideShow ppt = new XMLSlideShow(slideShow);
 
 			//prepare and open new pdf
-			Document document = new Document();
+			Document document = new Document(PageSize.A4.rotate());
 			PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(target));
 			document.open();
 
@@ -173,7 +174,7 @@ public class ConvertingService {
 				ImageIO.write(img, "png", byteOut);
 				//use itext image for optimal results
 				Image image = Image.getInstance(byteOut.toByteArray());
-				image.scaleToFit(595, 842); //set to A4 format
+				image.scaleToFit(842, 595); //set to A4 format
 				image.setAbsolutePosition(0, 0); //bottom-left
 				document.add(image);
 				document.newPage();

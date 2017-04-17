@@ -57,6 +57,7 @@ libraries ;-) Therefore, credits goes to:
 - Spring Boot
 - Lombok
 - iText
+- Apache POI
 - Documents4j
 - jQuery
 - Materialize
@@ -83,6 +84,10 @@ So I came up with documents4j. A library which basically runs a script to call t
 This approach obviously brings some disadvantages with it. You need a copy of ms-office on your
 maschine and its only runnable on windows. Their is a remote-call feature, but I havent tried it out
 yet. **NOTE:** _Please keep an eye one the MS-Office EULA and their restrictions of usage with other programs_
+<br>Apprently documents4j doesn't support a powerpoint solution. So I used Apache POI to generate
+an image from each slide and save via iText in one pdf file. This approach works, but suffers from the
+same problem named above: The open-source rendering engines simply aren't good enough. And
+therefore the results don't necessary have to match the input powerpoint :/
 
 ## TODOS
 * Add Mailing Service for sending a mail with personal link to customer
