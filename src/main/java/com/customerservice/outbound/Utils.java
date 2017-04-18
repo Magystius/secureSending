@@ -2,6 +2,7 @@ package com.customerservice.outbound;
 
 import com.customerservice.outbound.domain.FormData;
 import com.customerservice.outbound.exception.DeletionException;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,6 +23,9 @@ import java.util.Map;
  * @author Tim Dekarz
  */
 public class Utils {
+
+	@Value("${file.output}")
+	private static String output;
 
 	private static Map<String, List<File>> generatedFiles = new HashMap<>(); //list for garbage collector
 
@@ -83,7 +87,7 @@ public class Utils {
 		md5.update(email.getBytes(),0,email.length());
 		String fileName = new BigInteger(1,md5.digest()).toString(16); //hash fileName
 		//create parent dir
-		File file = new File("./tmp/" + fileName);
+		File file = new File(output + fileName);
 		if (!file.exists()) {
 			file.mkdirs();
 		}
@@ -114,7 +118,7 @@ public class Utils {
 				file.delete();
 			}
 			//delete parent dir
-			File dir = new File("./tmp/" + dirName);
+			File dir = new File(output + dirName);
 			//check if empty
 			DirectoryStream<Path> dirStream = Files.newDirectoryStream(dir.toPath());
 			if(!dirStream.iterator().hasNext()) {

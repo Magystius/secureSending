@@ -1,6 +1,7 @@
 package com.customerservice.outbound.web;
 
 import com.customerservice.outbound.domain.Location;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -20,6 +21,9 @@ import java.nio.file.Files;
 @Controller
 public class ImageController {
 
+	@Value("${file.image}")
+	private String image;
+
 	/**
 	 * recieve an image via id
 	 * @param fileName - image id
@@ -30,17 +34,18 @@ public class ImageController {
 
 		try {
 			// check if file exists
-			File image = new File("./img/" + fileName);
-			if(!image.exists()) {
+			File imageFile = new File(image + fileName);
+			if(!imageFile.exists()) {
 				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 			}
 
 			//prepare response
 			HttpHeaders headers = new HttpHeaders();
-			headers.setContentType(MediaType.parseMediaType("image/jpeg"));
-			headers.setContentLength(image.length());
+			String type = fileName.endsWith(".png") ? "image/png" : "image/jpeg";
+			headers.setContentType(MediaType.parseMediaType(type));
+			headers.setContentLength(imageFile.length());
 
-			return new ResponseEntity<>(Files.readAllBytes(image.toPath()), headers, HttpStatus.OK); //read file and return it in response
+			return new ResponseEntity<>(Files.readAllBytes(imageFile.toPath()), headers, HttpStatus.OK); //read file and return it in response
 		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -59,9 +64,10 @@ public class ImageController {
 
 		//detect type of file
 		String type;
-		if(file.getContentType().contains("png")) {
+		String mimeType = file.getContentType();
+		if(mimeType.equalsIgnoreCase("image/png")) {
 			type = "png";
-		} else if(file.getContentType().contains("jpg") || file.getContentType().contains("jpeg")) {
+		} else if(mimeType.equalsIgnoreCase("image/jpeg")) {
 			type = "jpg";
 		} else {
 			response.setStatus( HttpServletResponse.SC_BAD_REQUEST);
@@ -69,7 +75,7 @@ public class ImageController {
 		}
 		//generate unique name and file
 		String fileName = Long.toString(System.currentTimeMillis()) + "." + type;
-		File psFile = new File("./img/" + fileName);
+		File psFile = new File( image + fileName);
 		if (!psFile.exists()) {
 			psFile.createNewFile();
 		}

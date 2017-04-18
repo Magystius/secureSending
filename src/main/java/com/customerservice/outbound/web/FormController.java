@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.util.*;
@@ -23,8 +24,26 @@ import java.util.*;
 @Controller
 public class FormController {
 
+	@Value("${process.useParallelThreads")
+	boolean useParallelThreads;
+
+	@Value("${process.deleteFiles")
+	boolean deleteFiles;
+
+	@Value("${merge")
+	boolean merge;
+
 	@Value("${customer}")
 	private String customer;
+
+	@Value("${dev.delay")
+	private int delay;
+
+	@Value("${process.letterName")
+	private String letterName;
+
+	@Value("${process.mergeName")
+	private String mergeName;
 
 	private final Logger logger = LogManager.getLogger(this.getClass());
 
@@ -66,48 +85,54 @@ public class FormController {
 	@RequestMapping(value = "/form", method = RequestMethod.POST)
 	public String submit(@ModelAttribute FormData data, Map<String, Object> model) {
 
-		//TODO: Delete MOCKUP
-		//Pause for 4 seconds
-		/*try {
-			Thread.sleep(4000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}*/
+		//use delay for dev urposes
+		if(delay > 0) {
+			try {
+				Thread.sleep(delay);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 
 		//validation
-		List<Map<String, String>> errors = validationService.validateInput(data);
-		if (errors.size() > 0) {
-			//invalid input
-			Utils.populateModel(data, model);
-			model.put("failure", true);
-			model.put("errorList", errors);
-		} else {
-			//TODO: do something with your pdfs
-			try {
-				List<File> files = new ArrayList<>();
+		if(!validationService.handleValidation(data, model)) {
+			return "form";
+		}
+
+		//process input
+		try {
+			List<File> files = new ArrayList<>();
+			if(useParallelThreads) {
 				files.addAll(generationService.processAll(data)); //use this method for parallel converting/generating
-				/*files.add(generationService.generateLetter(data));
+			} else {
+				files.add(generationService.generateLetter(data, letterName));
 				if(!data.getUploads().get(0).getOriginalFilename().isEmpty()) {
 					for(MultipartFile file : data.getUploads()) {
 						files.add(convertingService.convertToPdf(data.getEmail(), file));
 					}
-				}*/
-				generationService.mergeDir(data.getEmail()); // use mail as dir id to merge all previously generated docs
-				//TODO: send to somewhere
-				//Utils.deleteFiles(data.getEmail(), null); //delete temp files
-
-			} catch (Exception e) {
-				Utils.populateModel(data, model);
-				model.put("failure", true);
-				errors = new ArrayList<>();
-				HashMap<String, String> error = new HashMap<>();
-				error.put("error", "Bei der Generierung ist ein unerwarteter Fehler aufgetreten");
-				errors.add(error);
-				model.put("errorList", errors);
+				}
 			}
-			Utils.populateModel(new FormData(), model);
-			model.put("success", true);
+			if(merge) {
+				generationService.mergeDir(data.getEmail(), mergeName); // use mail as dir id to merge all previously generated docs
+			}
+			//TODO: send to somewhere
+			if(deleteFiles) {
+				Utils.deleteFiles(data.getEmail(), null); //delete temp files
+			}
+
+		} catch (Exception e) {
+			Utils.populateModel(data, model);
+			model.put("failure", true);
+			List<Map<String, String>> errors = new ArrayList<>();
+			HashMap<String, String> error = new HashMap<>();
+			error.put("error", "Bei der Generierung ist ein unerwarteter Fehler aufgetreten");
+			errors.add(error);
+			model.put("errorList", errors);
+
+			return "form";
 		}
+		Utils.populateModel(new FormData(), model);
+		model.put("success", true);
 
 		return "form";
 	}

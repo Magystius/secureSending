@@ -5,6 +5,7 @@ import com.customerservice.outbound.Utils;
 import com.customerservice.outbound.domain.FormData;
 import com.customerservice.outbound.service.GenerationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -26,6 +27,15 @@ import java.util.Map;
 @Controller
 public class PreviewController {
 
+	@Value("${process.validateInput")
+	boolean validateInput;
+
+	@Value("${file.output}")
+	private String output;
+
+	@Value("${preview.name")
+	private String previewName;
+
 	private final ValidationService validationService;
 	private final GenerationService generationService;
 
@@ -45,7 +55,7 @@ public class PreviewController {
 
 		try {
 			// check if file exists
-			File letter = new File("./tmp/" + fileName + "/preview.pdf");
+			File letter = new File(output + fileName + "/" + previewName + ".pdf");
 			if(!letter.exists()) {
 				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 			}
@@ -53,7 +63,7 @@ public class PreviewController {
 			//prepare response
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.parseMediaType("application/pdf"));
-			String filename = "preview.pdf";
+			String filename = previewName + ".pdf";
 			headers.setContentDispositionFormData(filename, filename);
 			headers.setContentLength(letter.length());
 			headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
@@ -75,20 +85,14 @@ public class PreviewController {
 	public String generatePreview(@ModelAttribute FormData data, Map<String, Object> model) throws Exception {
 
 		//validation
-		List<Map<String, String>> errors = validationService.validateInput(data);
-		if (errors.size() > 0) {
-			//invalid input
-			Utils.populateModel(data, model);
-			model.put("failure", true);
-			model.put("errorList", errors);
-		} else {
-			// generate the file
-			File letter = generationService.generateLetter(data);
-
-			//redirect to file
-			return "redirect:/preview?id=" + letter.getParentFile().getName();
+		if(!validationService.handleValidation(data, model)) {
+			return "form";
 		}
 
-		return "form";
+		// generate the file
+		File letter = generationService.generateLetter(data, previewName);
+
+		//redirect to file
+		return "redirect:/preview?id=" + letter.getParentFile().getName();
 	}
 }

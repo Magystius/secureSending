@@ -9,8 +9,11 @@ import com.itextpdf.text.Document;
 import com.itextpdf.text.Image;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.pdf.PdfWriter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.poi.xslf.usermodel.XMLSlideShow;
 import org.apache.poi.xslf.usermodel.XSLFSlide;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -31,9 +34,17 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class ConvertingService {
 
+	@Value("${file.output}")
+	private String output;
+
+	@Value("${upload.keepOriginalName")
+	private boolean keepOriginalName;
+
+	private final Logger logger = LogManager.getLogger(this.getClass());
+
 	//init local convert instance for office files; uses tmp dir for scripts
 	private IConverter converter = LocalConverter.builder()
-		.baseFolder(new File("./tmp"))
+		.baseFolder(new File(output))
 		.workerPool(20, 25, 2, TimeUnit.SECONDS)
 		.processTimeout(5, TimeUnit.SECONDS)
 		.build();
@@ -61,14 +72,19 @@ public class ConvertingService {
 
 		//get basic data from file
 		String type = file.getContentType();
-		String[] temp = file.getOriginalFilename().split("\\.");
 		String rawName = "";
-		for(int i = 0; i < temp.length - 1; i++) {
-			rawName += temp[i];
+		//keep orignal file name or use common one
+		if(keepOriginalName) {
+			String[] temp = file.getOriginalFilename().split("\\.");
+			for (int i = 0; i < temp.length - 1; i++) {
+				rawName += temp[i];
+			}
+		} else {
+			rawName = dirName + "_upload_" + System.currentTimeMillis();
 		}
 
 		//generate file
-		String fileName = "./tmp/" + dirName + "/" + rawName + ".pdf";
+		String fileName = output + dirName + "/" + rawName + ".pdf";
 		File psFile = new File(fileName);
 		if (!psFile.exists()) {
 			psFile.createNewFile();
@@ -110,6 +126,8 @@ public class ConvertingService {
 	 */
 	private boolean savePdf(InputStream source, File target) {
 
+		logger.info("save new pdf to" + target.getName());
+
 		try {
 			byte[] buffer = new byte[source.available()];
 			source.read(buffer); //read all bytes
@@ -135,6 +153,8 @@ public class ConvertingService {
 	 */
 	private boolean convertMSOfficeToPdf(InputStream officeFile, File target, DocumentType type) {
 
+		logger.info("save ms office file to" + target.getName());
+
 		return converter
 			.convert(officeFile).as(type)
 			.to(target).as(DocumentType.PDF)
@@ -144,6 +164,8 @@ public class ConvertingService {
 	}
 
 	private boolean convertSlideShowToPdf(InputStream slideShow, File target) {
+
+		logger.info("save slide show to" + target.getName());
 
 		try {
 			//init slide object
@@ -197,6 +219,8 @@ public class ConvertingService {
 	 * @return - indicator wether converting was successful or not
 	 */
 	private boolean convertImageToPdf(byte[] imageFile, File target) {
+
+		logger.info("save image" + target.getName());
 
 		try {
 			//prepare and open new pdf

@@ -1,6 +1,8 @@
 package com.customerservice.outbound.service;
 
+import com.customerservice.outbound.Utils;
 import com.customerservice.outbound.domain.FormData;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,7 +16,28 @@ import java.util.regex.Pattern;
 @Service
 public class ValidationService {
 
-	private static String[] supportedFileTypes = {"pdf", "jpg", "jpeg", "png", "xls", "xlsx", "doc", "docx", "ppt", "pptx"}; //list with all supported files
+	@Value("${upload.fileTypes")
+	private String supportedFileTypes;
+
+	@Value("${process.validateInput")
+	boolean validateInput;
+
+	public boolean handleValidation(FormData data, Map<String, Object> model) {
+		//validation
+		if(validateInput) {
+			List<Map<String, String>> errors = validateInput(data);
+			if (errors.size() > 0) {
+				//invalid input
+				Utils.populateModel(data, model);
+				model.put("failure", true);
+				model.put("errorList", errors);
+
+				return false;
+			}
+		}
+
+		return true;
+	}
 
 	/**
 	 * validates given data and returns list with errors - if they were found
@@ -88,7 +111,7 @@ public class ValidationService {
 		if(!data.getUploads().get(0).getOriginalFilename().isEmpty()) {
 			for(MultipartFile file : data.getUploads()) {
 				String[] temp = file.getOriginalFilename().split("\\.");
-				if(!Arrays.toString(supportedFileTypes).contains(temp[temp.length - 1])) {
+				if(!supportedFileTypes.contains(temp[temp.length - 1])) {
 					HashMap<String, String> error = new HashMap<>();
 					error.put("error", "Nicht unterstütztes Dateiformat: " + temp[temp.length - 1]);
 					error.put("field", "uploads");
