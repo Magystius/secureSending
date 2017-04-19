@@ -37,17 +37,25 @@ public class ConvertingService {
 	@Value("${file.output}")
 	private String output;
 
-	@Value("${upload.keepOriginalName")
+	@Value("${upload.keepOriginalName}")
 	private boolean keepOriginalName;
 
 	private final Logger logger = LogManager.getLogger(this.getClass());
 
-	//init local convert instance for office files; uses tmp dir for scripts
-	private IConverter converter = LocalConverter.builder()
-		.baseFolder(new File(output))
-		.workerPool(20, 25, 2, TimeUnit.SECONDS)
-		.processTimeout(5, TimeUnit.SECONDS)
-		.build();
+	private IConverter converter;
+
+	/**
+	 * standard constructor
+	 * init the converter
+	 */
+	public ConvertingService(@Value("${file.output}") String output) {
+		//init local convert instance for office files; uses tmp dir for scripts
+		converter = LocalConverter.builder()
+			.baseFolder(new File(output))
+			.workerPool(20, 25, 2, TimeUnit.SECONDS)
+			.processTimeout(5, TimeUnit.SECONDS)
+			.build();
+	}
 
 	/**
 	 * Main dispatcher method. generate a pdf file from given input

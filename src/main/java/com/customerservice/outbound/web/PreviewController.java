@@ -27,13 +27,13 @@ import java.util.Map;
 @Controller
 public class PreviewController {
 
-	@Value("${process.validateInput")
+	@Value("${process.validateInput}")
 	boolean validateInput;
 
 	@Value("${file.output}")
 	private String output;
 
-	@Value("${preview.name")
+	@Value("${preview.name}")
 	private String previewName;
 
 	private final ValidationService validationService;

@@ -19,7 +19,7 @@ public class ValidationService {
 	@Value("${upload.fileTypes")
 	private String supportedFileTypes;
 
-	@Value("${process.validateInput")
+	@Value("${process.validateInput}")
 	boolean validateInput;
 
 	public boolean handleValidation(FormData data, Map<String, Object> model) {

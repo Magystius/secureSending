@@ -24,25 +24,25 @@ import java.util.*;
 @Controller
 public class FormController {
 
-	@Value("${process.useParallelThreads")
+	@Value("${process.useParallelThreads}")
 	boolean useParallelThreads;
 
-	@Value("${process.deleteFiles")
+	@Value("${process.deleteFiles}")
 	boolean deleteFiles;
 
-	@Value("${merge")
+	@Value("${merge}")
 	boolean merge;
 
 	@Value("${customer}")
 	private String customer;
 
-	@Value("${dev.delay")
+	@Value("${dev.delay}")
 	private int delay;
 
-	@Value("${process.letterName")
+	@Value("${process.letterName}")
 	private String letterName;
 
-	@Value("${process.mergeName")
+	@Value("${process.mergeName}")
 	private String mergeName;
 
 	private final Logger logger = LogManager.getLogger(this.getClass());

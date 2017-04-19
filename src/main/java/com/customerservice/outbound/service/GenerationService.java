@@ -38,10 +38,10 @@ public class GenerationService {
 	@Value("${file.image}")
 	private String image;
 
-	@Value("${merge.pageNumbers")
+	@Value("${merge.pageNumbers}")
 	private boolean pageNumbers;
 
-	@Value("${process.letterName")
+	@Value("${process.letterName}")
 	private String letterName;
 
 	private final Logger logger = LogManager.getLogger(this.getClass());
