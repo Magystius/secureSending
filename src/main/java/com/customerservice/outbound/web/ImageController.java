@@ -4,88 +4,64 @@ import com.customerservice.outbound.domain.Location;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import javax.servlet.http.HttpServletResponse;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.List;
 
-/**
- * Web Controller for handling image uploads
- * @author Tim Dekarz
- */
+import static org.apache.poi.openxml4j.opc.ContentTypes.IMAGE_JPEG;
+import static org.apache.poi.openxml4j.opc.ContentTypes.IMAGE_PNG;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.MediaType.*;
+
+
 @Controller
 public class ImageController {
 
+	private static final List<String> allowedImageTypes = Arrays.asList(IMAGE_JPEG_VALUE, IMAGE_PNG_VALUE);
 	@Value("${file.image}")
 	private String image;
 
-	/**
-	 * recieve an image via id
-	 * @param fileName - image id
-	 * @return - response with image data
-	 */
 	@RequestMapping(value = "/image", method = RequestMethod.GET)
 	public ResponseEntity<byte[]> getImage(@RequestParam(value = "id") String fileName) {
-
 		try {
-			// check if file exists
 			File imageFile = new File(image + fileName);
-			if(!imageFile.exists()) {
-				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-			}
+			if (!imageFile.exists())
+				return ResponseEntity.badRequest().build();
 
-			//prepare response
-			HttpHeaders headers = new HttpHeaders();
-			String type = fileName.endsWith(".png") ? "image/png" : "image/jpeg";
-			headers.setContentType(MediaType.parseMediaType(type));
-			headers.setContentLength(imageFile.length());
-
-			return new ResponseEntity<>(Files.readAllBytes(imageFile.toPath()), headers, HttpStatus.OK); //read file and return it in response
+			HttpHeaders headers = prepareHttpHeaders(fileName, imageFile.length());
+			return new ResponseEntity<>(Files.readAllBytes(imageFile.toPath()), headers, HttpStatus.OK);
 		} catch (Exception e) {
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+			return ResponseEntity.status(INTERNAL_SERVER_ERROR).build();
 		}
 	}
 
-	/**
-	 * upload and image and return location
-	 * @param file - image data
-	 * @param response - response object
-	 * @return - location object with image url
-	 * @throws Exception
-	 */
+	@ResponseBody
 	@RequestMapping(value = "/image", method = RequestMethod.POST, produces = "application/json")
-	public @ResponseBody
-	Location saveImage(@ModelAttribute MultipartFile file, HttpServletResponse response) throws Exception {
-
-		//detect type of file
-		String type;
+	public ResponseEntity<Location> saveImage(@ModelAttribute MultipartFile file) throws Exception {
 		String mimeType = file.getContentType();
-		if(mimeType.equalsIgnoreCase("image/png")) {
-			type = "png";
-		} else if(mimeType.equalsIgnoreCase("image/jpeg")) {
-			type = "jpg";
-		} else {
-			response.setStatus( HttpServletResponse.SC_BAD_REQUEST);
-			return new Location();
-		}
-		//generate unique name and file
-		String fileName = Long.toString(System.currentTimeMillis()) + "." + type;
-		File psFile = new File( image + fileName);
-		if (!psFile.exists()) {
+		if (!allowedImageTypes.contains(mimeType))
+			return ResponseEntity.badRequest().build();
+
+		String fileName = Long.toString(System.currentTimeMillis()) + "." + mimeType.substring(mimeType.length() - 3);
+		File psFile = new File(image + fileName);
+		if (!psFile.exists())
 			psFile.createNewFile();
-		}
-		//persist file
 		new FileOutputStream(psFile).write(file.getBytes());
 
-		//init location object with path
-		Location loc = new Location();
-		loc.setLocation(fileName);
+		return ResponseEntity.ok(Location.builder().location(fileName).build());
+	}
 
-		return loc;
+	private HttpHeaders prepareHttpHeaders(String fileName, Long fileLength) {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(valueOf(fileName.endsWith(".png") ? IMAGE_PNG : IMAGE_JPEG));
+		headers.setContentLength(fileLength);
+		return headers;
 	}
 }

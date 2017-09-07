@@ -1,26 +1,23 @@
 package com.customerservice.outbound.web;
 
+import com.customerservice.outbound.Utils;
 import com.customerservice.outbound.domain.FormData;
+import com.customerservice.outbound.service.ConvertingService;
 import com.customerservice.outbound.service.GenerationService;
 import com.customerservice.outbound.service.ValidationService;
-import com.customerservice.outbound.Utils;
-import com.customerservice.outbound.service.ConvertingService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-/**
- * Web Controller for the plain form
- * contains base url
- * @author Tim Dekarz
- */
 @Controller
 public class FormController {
 
@@ -45,8 +42,6 @@ public class FormController {
 	@Value("${process.mergeName}")
 	private String mergeName;
 
-	private final Logger logger = LogManager.getLogger(this.getClass());
-
 	private final ValidationService validationService;
 	private final GenerationService generationService;
 	private final ConvertingService convertingService;
@@ -59,34 +54,17 @@ public class FormController {
 		this.convertingService = convertingService;
 	}
 
-	/**
-	 * serves initial form
-	 * @param data - empty formdata object
-	 * @param model - empty model
-	 * @return
-	 */
 	@RequestMapping(value = "/form", method = RequestMethod.GET)
 	public String initial(FormData data,
 						  Map<String, Object> model) {
-
-		logger.info("index route called");
-
-		Utils.populateModel(data, model); //set values for view
-
+		Utils.populateModel(data, model);
 		return "form";
 	}
 
-	/**
-	 *
-	 * @param data
-	 * @param model
-	 * @return
-	 */
 	@RequestMapping(value = "/form", method = RequestMethod.POST)
 	public String submit(@ModelAttribute FormData data, Map<String, Object> model) {
-
-		//use delay for dev urposes
-		if(delay > 0) {
+		//TODO: delete this
+		if (delay > 0) {
 			try {
 				Thread.sleep(delay);
 			} catch (InterruptedException e) {
@@ -94,46 +72,42 @@ public class FormController {
 			}
 		}
 
-		//validation
-		if(!validationService.handleValidation(data, model)) {
+		if (!validationService.handleValidation(data, model))
 			return "form";
-		}
 
-		//process input
 		try {
 			List<File> files = new ArrayList<>();
-			if(useParallelThreads) {
-				files.addAll(generationService.processAll(data)); //use this method for parallel converting/generating
-			} else {
+			if (useParallelThreads)
+				files.addAll(generationService.processAll(data));
+			else {
 				files.add(generationService.generateLetter(data, letterName));
-				if(!data.getUploads().get(0).getOriginalFilename().isEmpty()) {
-					for(MultipartFile file : data.getUploads()) {
-						files.add(convertingService.convertToPdf(data.getEmail(), file));
-					}
-				}
+				if (!data.getUploads().get(0).getOriginalFilename().isEmpty())
+					data.getUploads().forEach(file -> files.add(convertingService.convertToPdf(data.getEmail(), file)));
 			}
-			if(merge) {
-				generationService.mergeDir(data.getEmail(), mergeName); // use mail as dir id to merge all previously generated docs
-			}
+			if (merge)
+				generationService.mergeDir(data.getEmail(), mergeName);
+
 			//TODO: send to somewhere
-			if(deleteFiles) {
-				Utils.deleteFiles(data.getEmail(), null); //delete temp files
-			}
-
+			if (deleteFiles)
+				Utils.deleteFiles(data.getEmail(), null);
 		} catch (Exception e) {
-			Utils.populateModel(data, model);
-			model.put("failure", true);
-			List<Map<String, String>> errors = new ArrayList<>();
-			HashMap<String, String> error = new HashMap<>();
-			error.put("error", "Bei der Generierung ist ein unerwarteter Fehler aufgetreten");
-			errors.add(error);
-			model.put("errorList", errors);
-
+			prepareErrorModel(data, model);
 			return "form";
 		}
+
 		Utils.populateModel(new FormData(), model);
 		model.put("success", true);
 
 		return "form";
+	}
+
+	private void prepareErrorModel(@ModelAttribute FormData data, Map<String, Object> model) {
+		Utils.populateModel(data, model);
+		model.put("failure", true);
+		List<Map<String, String>> errors = new ArrayList<>();
+		HashMap<String, String> error = new HashMap<>();
+		error.put("error", "Bei der Generierung ist ein unerwarteter Fehler aufgetreten");
+		errors.add(error);
+		model.put("errorList", errors);
 	}
 }

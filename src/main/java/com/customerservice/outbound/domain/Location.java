@@ -1,22 +1,12 @@
 package com.customerservice.outbound.domain;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Builder;
+import lombok.Value;
 
-/**
- * Entity Class for async callbacks of embedded images
- * @author Tim Dekarz
- */
-@Getter
-@Setter
+@Value
+@Builder
 public class Location {
 
-	private String location; //should be relative path. pay attention for base urls
+	private final String location;
 
-	/**
-	 * Standard Constructor for default values
-	 */
-	public Location() {
-		this.location = "";
-	}
 }

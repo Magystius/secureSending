@@ -1,20 +1,16 @@
 package com.customerservice.outbound.domain;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.Value;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Entity Class for User Input from Webform
- * @author Tim Dekarz
- */
-@Getter
-@Setter
+@Data
 public class FormData {
 
-	private String title; //should be 'male' or 'female'
+	private String title;
 
 	private String firstName;
 
@@ -24,19 +20,16 @@ public class FormData {
 
 	private String password;
 
-	private String taskId; //should only be digits
+	private String taskId;
 
-	private String contractId; //should only be digits
+	private String contractId;
 
 	private String subject;
 
 	private String message;
 
-	private List<MultipartFile> uploads; //use multipartfile for spring upload support
+	private List<MultipartFile> uploads;
 
-	/**
-	 * Standard constructur to ensure default values
-	 */
 	public FormData() {
 		this.title = "";
 		this.firstName = "";

@@ -1,6 +1,7 @@
 package com.customerservice.outbound;
 
 import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
@@ -11,16 +12,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created by timdekarz on 29.03.17.
- */
 @ControllerAdvice
-public class ExceptionHandler extends ResponseEntityExceptionHandler {
+public class ErrorHandler extends ResponseEntityExceptionHandler {
 
-	@org.springframework.web.bind.annotation.ExceptionHandler(MultipartException.class)
-	ModelAndView handleFileException(HttpServletRequest request, Exception exception) {
+	@ExceptionHandler(MultipartException.class)
+	public ModelAndView handleFileException(HttpServletRequest request, Exception exception) {
 
-		//get parameters
 		//TODO: This doest not work, cause request has no params!
 		Map<String, Object> model = new HashMap<>();
 		Map<String, String[]> data = request.getParameterMap();

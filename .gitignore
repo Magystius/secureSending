@@ -14,3 +14,8 @@ LibraryManagement.iml
 database.trace.db
 /src/main/webapp/static/css/app.min.css
 /src/main/webapp/static/js/app.min.js
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml

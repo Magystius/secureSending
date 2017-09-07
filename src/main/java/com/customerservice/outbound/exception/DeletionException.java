@@ -1,14 +1,6 @@
 package com.customerservice.outbound.exception;
 
-/**
- * Custom Exception for Deletion Errors
- * @author Tim Dekarz
- */
-public class DeletionException extends Exception {
-
-	public DeletionException() {
-		super();
-	}
+public class DeletionException extends RuntimeException {
 
 	public DeletionException(String msg) {
 		super(msg);
